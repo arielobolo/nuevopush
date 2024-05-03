@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>generador de imagenes</title>
+    <!-- Incluye jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- Enlace al script de CKEditor 5 desde la CDN -->
+    <script src="/ckeditor/ckeditor.js"></script>
+</head>
+<style>
+    #imagen{
+        width: 400px;
+        height: 800px;
+    }
+</style>
+<body>
+    <h1>Editor de CKEditor 5</h1>
+    <!-- Agrega un textarea con el ID 'content' -->
+    <textarea name="content" id="content"></textarea>
+    <!-- Agrega un botón para generar la imagen -->
+    <button id="generateImage">Generar Imagen</button>
+    <!-- Agrega un div donde se mostrará la imagen -->
+    <div id="imagen"></div>
+
+    <script>
+        // Espera a que el DOM esté listo
+        $(function(){
+            // Reemplaza el textarea con CKEditor
+            CKEDITOR.replace('content');
+
+            // Agrega un controlador de eventos para el botón
+            $('#generateImage').on('click', function(){
+                // Obtiene el contenido del editor CKEditor
+                var contenido = CKEDITOR.instances.content.getData();
+                
+                // Agrega el contenido al div con ID 'imagen'
+                $('#imagen').html(contenido);
+
+                // Envía el contenido al servidor
+                $.post('/generarimagen', { contenido: contenido }, function(response){
+                    console.log(response);
+                });
+            });
+        });
+    </script>
+</body>
+</html>

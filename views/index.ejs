@@ -1,0 +1,1295 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control</title>
+    <!-- Agregamos Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+    
+
+    <!-- Estilos personalizados -->
+    <style>
+        /* Establecer altura del 100% para html y body */
+        html, body {
+            height: 100%;
+        }
+
+        /* Estilos personalizados para el panel de control */
+        .panel-section {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .panel-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        /* Estilos para la barra lateral */
+        .sidebar {
+            background-color: #007bff; /* Color azul */
+            color: white; /* Texto en blanco */
+            padding-top: 20px;
+            padding-bottom: 20px;
+            height: 100%; /* Altura del 100% para ocupar toda la página */
+            width: 601px;
+        }
+
+   
+            /* Estilos para la barra lateral */
+    
+        .col-lg-9 {
+        width:calc(100% - 601px); /* Asigna el ancho deseado */
+        /* Puedes ajustar el ancho según tus necesidades */
+    }
+ 
+    .blink {
+        animation: blink-animation 1s steps(5, start) infinite;
+        -webkit-animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+
+    @-webkit-keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+
+
+    #startButton{
+width: 90px;
+    }   
+    #pauseButton{
+        width: 90px;
+    }   
+    #stopButton{
+        width: 90px;
+    }      
+
+
+    .selected {
+        background-color: rgb(119, 14, 231); /* Cambiar al color que desees */
+    }
+
+    #outputTextarea,
+    #guardarPlantilla {
+        display: none;
+    }
+  
+        /* Estilo para agregar más espacio entre los archivos */
+        #arbol ul li {
+            margin-bottom: 8px; /* Ajusta este valor según sea necesario */
+        }
+   
+</style>
+</head>
+<body>
+    <div class="container-fluid h-100"> <!-- Establecer altura del 100% para el contenedor principal -->
+        <div class="row h-100"> <!-- Establecer altura del 100% para la fila -->
+            <!-- Barra lateral -->
+            <div class="col-lg-3 sidebar">
+          
+                <div style="display: flex; align-items: center;">
+                    <img src="http://localhost:3000/IMAGEN/LOGO.GIF" alt="Descripción de la imagen" width="150" height="80">
+                    <div id="contador" style="margin-left: auto; font-size: 80px; font-family: 'Comic Sans MS', cursive;">0</div>
+                   
+                </div>
+                <br>Próximo mensaje en: <span id="contadordeenvio"> espera</span>
+                <div id="estado" style="margin-left: auto; font-size: 20px; font-family: 'Comic Sans MS', cursive;"></div>
+                
+            <hr>
+                <div class="mb-3">
+                    <label for="tiempoEnvio" class="form-label">Tiempo de envío:</label>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-primary active">
+                            <input type="radio" name="options" id="option1" autocomplete="off" checked> RAPIDO
+                            <div class="tiempodeenvio"> 5(seg)</div>
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="option2" autocomplete="off"> MEDIO
+                            <div class="tiempodeenvio"> 10(seg)</div>
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="option3" autocomplete="off"> SUPERFAST
+                            <div class="tiempodeenvio">1(SEG)</div>
+                        </label>
+                    </div>
+
+                 
+                    <input type="number" class="form-control" id="tiempoEnvio" name="tiempoEnvio" value="5" required hidden>
+                    <div id="erro8">ok</div>
+                    <br>     <hr>         
+<hr>
+                </div>
+                <label for="tiempoEnvio" class="form-label">Controles de accion:</label>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <button id="startButton" class="btn btn-success"><i class='bx bx-play'></i></button>
+                <button id="pauseButton" class="btn btn-warning"><i class='bx bx-pause'></i></button>             
+                <button id="stopButton" class="btn btn-danger"><i class='bx bx-stop'></i></button>
+                </div>
+<hr>
+<br><br>
+                
+
+<button id="recargar" style="display: none;">Recargar</button>
+
+              <div id="listaturnos" style="color: chartreuse; background-color: black; height:800px; overflow-y: scroll; overflow-x: scroll;">
+                <table id="numeros-list1" style="font-size: 12px; width: 900px;">
+                    <thead>
+                        <tr>
+                            <th>#</th> <!-- Nueva columna para el número de fila -->
+                            <th>Columna A</th>
+                            <th>Columna C</th>
+                            <th>Columna D</th>
+                            <th>Columna F</th>
+                            <th>Columna I</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% rowData.forEach((row, index) => { %>
+                            <tr>
+                                <td><%= index %></td> <!-- Muestra el número de fila -->
+                                <% row.forEach(cell => { %>
+                                    <td style="border-bottom: 1px solid black;"><%= cell %></td>
+                                <% }); %>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+         
+            </div>
+
+          
+
+
+            <!-- Contenido principal -->
+            <div class="col-lg-9">
+                <!-- Pestañas -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="mensajero-tab" data-bs-toggle="tab" data-bs-target="#mensajero" type="button" role="tab" aria-controls="mensajero" aria-selected="true">Mensajero</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="configuracion-tab" data-bs-toggle="tab" data-bs-target="#configuracion" type="button" role="tab" aria-controls="configuracion" aria-selected="false">Quienes Somos</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <!-- Pestaña 1: Mensajero -->
+                    <div class="tab-pane fade show active" id="mensajero" role="tabpanel" aria-labelledby="mensajero-tab">
+                        <div class="panel-section">
+                         
+                   <h3>       <div id="estadoqr" class="text-danger">PUSHSAP DESCONECTADO</div></h3> 
+            
+                
+
+                            <hr>
+                            <div id="qrContainer">
+                                <h1>Escanea el siguiente código QR con WhatsApp</h1>
+                                <img id="qrCodeImage" src="<%= qrCode %>" alt="WhatsApp QR Code">
+                            </div>
+                            <div id="statusMessage" style="display: none;"></div>
+                             
+        
+
+                     
+
+
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="card-title">Configuracion</h5> <!-- Título en la esquina superior izquierda -->
+                                </div>
+                                <div class="card-body d-flex">
+
+
+
+
+   <!-- Ficha 0 -->
+   <div class="card mr-3">
+    <div class="card-header">
+        <h5 class="card-title">plantillas</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <div class="card-body">
+      
+        <div id="arbol">
+            <!-- Lista de archivos en formato jstree -->
+            <ul >
+                <% plantillasFiles.forEach(file => { %>
+                    <li><%= file %></li>
+                <% }); %>
+            </ul>
+        </div>
+        
+        
+    </div>
+</div>
+
+
+
+
+                                    <!-- Ficha 1 -->
+                                    <div class="card mr-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Editor Plantilla</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body">
+                                            <button id="T1" class="btn btn-primary">CELDA A</button>
+                                            <button id="T2" class="btn btn-primary" >CELDA C</button>
+                                            <button id="T3" class="btn btn-primary">CELDA D</button>
+                                            <button id="T4" class="btn btn-primary">CELDA F</button>
+                                            <br>
+                                            <textarea id="inputTextarea" rows="4" cols="50"></textarea>
+                                            <br>
+                                            <button onclick="reemplazarTexto()" class="btn btn-primary">Guardar la plantilla</button>
+                                            
+
+<form id="formularioPlantilla">
+    <textarea id="outputTextarea" rows="4" cols="50"></textarea>
+    <button id="guardarPlantilla" type="submit">Guardar Plantilla</button>
+</form>
+
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Ficha 2 -->
+                                    <div class="card mr-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title">IMG Mensaje</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body">
+                                          
+                                            
+                                            <ul class="nav nav-tabs" id="customTab" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="imagen1-tab" data-bs-toggle="tab" data-bs-target="#imagen1" type="button" role="tab" aria-controls="imagen1" aria-selected="true" onclick="cargarImagen('imagen/1.gif')">Imagen 1</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen2-tab" data-bs-toggle="tab" data-bs-target="#imagen2" type="button" role="tab" aria-controls="imagen2" aria-selected="false" onclick="cargarImagen('imagen/2.gif')">Imagen 2</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen3-tab" data-bs-toggle="tab" data-bs-target="#imagen3" type="button" role="tab" aria-controls="imagen3" aria-selected="false" onclick="cargarImagen('imagen/3.gif')">Imagen 3</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen4-tab" data-bs-toggle="tab" data-bs-target="#imagen4" type="button" role="tab" aria-controls="imagen4" aria-selected="false" onclick="cargarImagen($('#miInput').val())">IMG URL</button>
+                                                </li>
+                                            </ul>
+                                        
+                                            <!-- Contenido de las pestañas personalizadas -->
+                                            <div class="tab-content" id="customTabContent">
+                                                <!-- Pestaña 1: Imagen 1 -->
+                                                <div class="tab-pane fade show active" id="imagen1" role="tabpanel" aria-labelledby="imagen1-tab">
+                                                    <img id="imagenA" src="imagen/1.gif" alt="Descripción de la imagen 1" style="width: 380px; height: 286px;">
+                                                </div>
+                                        
+                                                <!-- Pestaña 2: Imagen 2 -->
+                                                <div class="tab-pane fade" id="imagen2" role="tabpanel" aria-labelledby="imagen2-tab">
+                                                    <img id="imagenB" src="imagen/2.gif" alt="Descripción de la imagen 2" style="width: 380px; height: 286px;">
+                                                </div>
+                                        
+                                                <!-- Pestaña 3: Imagen 3 -->
+                                                <div class="tab-pane fade" id="imagen3" role="tabpanel" aria-labelledby="imagen3-tab">
+                                                    <img id="imagenC" src="imagen/3.gif" alt="Descripción de la imagen 3" style="width: 380px; height: 286px;">
+                                                </div>
+                                                 <!-- Pestaña 4: Imagen 4-->
+                                                 <div class="tab-pane fade" id="imagen4" role="tabpanel" aria-labelledby="imagen4-tab">
+                                                    IMG CON URL
+                                                    <br><BR>
+                                                    <input type="checkbox" id="miCheckbox" name="miCheckbox" value="valor"  checked>
+                                                      <input type="text" id="miInput" name="miInput" placeholder="INTRODUCE URL DE IMG" oninput="actualizarImagen(this.value)">
+
+                                                          </div>
+                                            </div>
+                                        </div>
+                                    
+                                        
+
+                                    </div>
+                                    
+                                 <!-- Ficha 3 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Upload</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="file1" class="form-label">(EXCEL)</label>
+            <input type="file" class="form-control-file" id="file1" name="file1" accept=".xlsx" required>
+            <button id="uploadButton" class="btn btn-primary">Subir XLSX</button> <!-- Botón para subir el archivo -->
+        </div>
+       
+      <!-- Archivo 2 -->
+<div class="mb-3">
+    <label for="file2" class="form-label">(GIF 1):</label>
+    <input type="file" class="form-control-file" id="file2" name="file2" accept=".gif" required>
+    <button id="uploadButton2" class="btn btn-primary">Subir GIF 1</button> <!-- Botón para subir el archivo 2 -->
+</div>
+
+
+     <!-- Archivo 3 -->
+<div class="mb-3">
+    <label for="file3" class="form-label">(GIF 2):</label>
+    <input type="file" class="form-control-file" id="file3" name="file3" accept=".gif" required>
+    <button id="uploadButton3" class="btn btn-primary">Subir GIF 2</button> <!-- Botón para subir el archivo 3 -->
+</div>
+
+
+      <!-- Archivo 4 -->
+<div class="mb-3">
+    <label for="file4" class="form-label">(GIF 3):</label>
+    <input type="file" class="form-control-file" id="file4" name="file4" accept=".gif" required>
+    <button id="uploadButton4" class="btn btn-primary">Subir GIF 3</button> <!-- Botón para subir el archivo 4 -->
+</div>
+
+
+    </div>
+</div>
+
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Server</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <div class="card-body">
+    
+        <button id="restartServerButton" class="btn btn-danger">Reiniciar Servidor</button>
+        <br><hr>
+        <form id="updateNumberForm">
+         <label for="newNumber">NUMERO QUE RECIBE MENSAJE DE CONEXION:</label><br>
+         <input type="text" id="newNumber" name="newNumber" required>
+         <button type="submit">Actualizar número</button>
+     </form>
+
+    </div>
+</div>
+
+
+                                </div>
+                            </div>
+                            
+                            <!-- Campo de entrada para la URL de la imagen -->
+                   
+                            
+                            <script>
+                                // Función para cargar la imagen correspondiente al hacer clic en la pestaña
+                                function cargarImagen(url) {
+                                    document.getElementById('imagena').value = url;
+                                }
+                            </script>
+                            
+
+
+                            
+
+
+                            <form id="enviarMensajeForm">
+
+
+                                <div class="d-flex">
+                                    <!-- Ficha 1 -->
+                                    <div class="card mb-3 d-inline-block">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Celdas del Excel</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body">
+                                     
+                                            <div class="mb-3">
+                                                <label for="F" class="form-label">CELDA A:</label>
+                                                <input type="text" class="form-control" id="A" name="A" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="C" class="form-label">CELDA C:</label>
+                                                <input type="text" class="form-control" id="C" name="C" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="D" class="form-label">CELDA D:</label>
+                                                <input type="text" class="form-control" id="D" name="D" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="A" class="form-label">CELDA F:</label>
+                                                <input type="text" class="form-control" id="F" name="F" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                  
+                                    <!-- Ficha 2 -->
+                                    <div class="card mb-3 d-inline-block flex-grow-1">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Mensaje</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label for="imagena" class="form-label">Imagen:</label>
+                                                <input type="text" class="form-control" id="imagena" name="imagena" value="imagen/1.gif" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="pais" class="form-label">País +:</label>
+                                                <input type="text" class="form-control" id="pais" name="pais" value="549" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="cod" class="form-label">Característica:</label>
+                                                <input type="text" class="form-control" id="cod" name="cod" value="351" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="numero" class="form-label">Número (CELDA I):</label>
+                                                <input type="text" class="form-control" id="numero" name="numero" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mensaje" class="form-label">Mensaje:</label>
+                                                <textarea class="form-control" id="mensaje" name="mensaje" style="height: 300px;" required></textarea>
+
+
+                                            </div>
+                                            <!-- Botón de enviar -->
+                                            <button type="button" class="btn btn-primary" onclick="enviarMensaje()">Enviar Mensaje</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+    
+                            </form>
+                            
+                        </div>
+                    </div>
+                    <!-- Pestaña 2: Configuración -->
+              <!-- Pestaña 2: Configuración -->
+              <div class="tab-pane fade" id="configuracion" role="tabpanel" aria-labelledby="configuracion-tab">
+                <div class="panel-section">
+                    <h2 class="panel-title">Desde 2014</h2>
+            
+                    <div class="d-flex justify-content-center">
+                        <img src="http://localhost:3000/IMAGEN/PUSHISAP.GIF" alt="Descripción de la imagen" width="800" height="800">
+                    </div>
+                </div>
+            </div>
+            
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>
+
+
+    <!-- Agregamos Bootstrap JS y Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Biblioteca jQuery (requerida para AJAX) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+   <!--/////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <script>
+
+
+
+
+
+const socket = io();
+
+socket.on('connect', () => {
+    socket.emit('requestStatus');
+});
+
+// Escucha la respuesta del servidor
+socket.on('statusResponse', (estado) => {
+    console.log(estado);
+    if (estado === 1) {
+        $('#estadoqr').html('PUSHISAP CONECTADO ').removeClass('text-danger blink').addClass('text-success');
+        $("#qrContainer").hide();
+    } else {
+        // Puedes manejar el otro estado aquí si es necesario
+        $('#estadoqr').html('PUSHISAP DESCONECTADO').removeClass('text-success').addClass('text-danger').addClass('blink');
+        // Puedes decidir mostrar el contenedor nuevamente si es necesario
+        $("#qrContainer").show();
+    }
+});
+
+socket.on('disconnect', () => {
+    $('#estadoqr').html('PUSHISAP DESCONECTADO').removeClass('text-success').addClass('text-danger').addClass('blink');
+});
+
+// Escuchar el evento 'qrCodeUpdated'
+socket.on('qrCodeUpdated', (newQrCode) => {
+    // Actualizar dinámicamente la imagen del código QR
+    const qrCodeImage = document.getElementById('qrCodeImage');
+    qrCodeImage.src = newQrCode;
+});
+
+// Escuchar el evento 'authenticated'
+socket.on('authenticated', (estado) => {
+    if (estado === 1) {
+        $('#estadoqr').html('PUSHISAP CONECTADO').removeClass('blink').addClass('text-success');
+        $('#estadoqr').html('PUSHISAP CONECTADO').removeClass('text-danger').addClass('text-success');
+
+        $("#qrContainer").hide();
+    } else {
+        // Puedes manejar el otro estado aquí si es necesario
+        $('#estadoqr').html('PUSHISAP DESCONECTADO').removeClass('text-success').addClass('text-danger').addClass('blink');
+        // Puedes decidir mostrar el contenedor nuevamente si es necesario
+        $("#qrContainer").show();
+    }
+});
+
+
+
+         var contador = 0; 
+        // Función para enviar mensajes mediante AJAX
+        function enviarMensaje() {
+    contador++;
+    $("#contador").text(contador);
+    
+    // Verificar si el checkbox está marcado
+    const checkboxMarcado = $('#miCheckbox').prop('checked');
+
+    // Obtener el valor del input de texto si el checkbox está marcado
+    let imagena = '';
+    if (checkboxMarcado) {
+        imagena = $('#miInput').val();
+    } else {
+        // Obtener el valor de imagena como lo hacías antes si el checkbox no está marcado
+        imagena = "http://localhost:3000/" + $('#imagena').val();
+    }
+
+    // Obtener los otros valores del formulario
+    const pais = $('#pais').val();
+    const cod = $('#cod').val();
+    const numero = $('#numero').val();
+    const mensaje = $('#mensaje').val();
+
+    // Realizar la solicitud AJAX para enviar el mensaje
+    $.ajax({
+        url: '/enviar-mensaje', // Ruta del servidor para manejar la solicitud
+        method: 'POST',
+        data: { imagena: imagena, pais: pais, cod: cod, numero: numero, mensaje: mensaje },
+        success: function(response) {
+            // Incrementar el contador y actualizar el elemento HTML
+            console.log(response);
+            $("#erro8").html(response);
+        },
+        error: function(error) {
+            // Manejar errores si es necesario
+            $("#estado").text('ERROR AL ENVIAR MENSAJES');
+        }
+    });
+}
+
+
+    $("#stopButton").click(function() {
+        contador = 0;
+        $("#contador").text(contador);
+    });
+
+        // Función para subir una imagen mediante AJAX
+        function subirImagen() {
+            // Obtener el archivo de imagen seleccionado
+            const formData = new FormData();
+            formData.append('imagen', $('#imagen')[0].files[0]);
+
+            // Realizar la solicitud AJAX para subir la imagen
+            $.ajax({
+                url: '/subir-imagen', // Ruta del servidor para manejar la solicitud de subida de imagen
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    // Manejar la respuesta del servidor si es necesario
+                    console.log(response);
+                },
+                error: function(error) {
+                    // Manejar errores si es necesario
+                    console.error(error);
+                }
+            });
+        }
+
+
+    
+     // Función para cargar el número al hacer clic en un ítem de la lista
+     $(document).ready(function() {
+       
+
+        $("#numeros-list li").click(function() {
+            var numero = $(this).text();
+            $("#numero").val(numero);
+        });
+    });
+
+
+    </script>
+
+    <script>
+$(document).ready(function() {
+    $("#estado").text("Detenido esperando acción").addClass("blink");
+    var listaItems = $("#numeros-list li");
+    var currentIndex = 0;
+    var timer; // Variable para el temporizador principal
+    var contadorTimer; // Variable para el temporizador del contador
+
+    // Función para mostrar el tiempo restante en el div contadordeenvio
+    function mostrarTiempoRestante(segundos) {
+        var contadorDeEnvio = $("#contadordeenvio");
+        contadorDeEnvio.text("Proximo mensaje en: " +  segundos);
+        contadorTimer = setInterval(function() {
+            segundos--;
+            if (segundos <= 0) {
+                clearInterval(contadorTimer);
+                contadorDeEnvio.text("");
+            } else {
+                contadorDeEnvio.text("Proximo mensaje en: " + segundos);
+            }
+        }, 1000);
+    }
+
+
+    // Función para limpiar el estado de la lista
+    function limpiarLista() {
+        listaItems.css("background-color", ""); // Eliminar el fondo verde de los ítems
+        currentIndex = 0; // Restablecer el índice
+    }
+
+    // Función para simular clic en el botón de enviar mensaje
+    function enviarMensaje() {
+        $("#enviarMensajeForm button").click();
+    }
+});
+
+
+
+
+
+
+ // Manejar el evento de clic en los botones de opción solo si no están deshabilitados
+$(".btn-group-toggle label").click(function() {
+    if (!$(this).find("input[type='radio']").prop("disabled")) {
+        // Eliminar la clase 'active' de todos los botones de opción
+        $(".btn-group-toggle label").removeClass("active");
+
+        // Agregar la clase 'active' solo al botón de opción seleccionado
+        $(this).addClass("active");
+    }
+});
+
+$(document).ready(function() {
+        // Función para cargar el número al hacer clic en una fila de la tabla
+        $("#numeros-list1 tbody tr").click(function() {
+            // Obtener el número de la columna I de la fila clicada
+            var numero = $(this).find("td:eq(5)").text();
+            // Colocar el número en el input correspondiente
+            $("#numero").val(numero);
+        });
+    });
+</script>
+
+
+<script>
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    $(document).ready(function() {
+    var currentIndex = 0; // Índice para seguir la fila actual
+    var timer; // Variable para el temporizador
+    var itemHeight = 36; // Altura de cada fila en la tabla (aproximada)
+    var isTimerRunning = true; // Variable para controlar si el temporizador está en ejecución o detenido
+    var tiempoRestante = 0; // Variable para almacenar el tiempo restante antes del próximo envío
+
+// Función para hacer clic automáticamente en las filas cada 5 segundos
+function autoClick() {
+    // Obtener todas las filas de la tabla
+    var rows = $("#numeros-list1 tbody tr");
+    // Si todavía hay filas por recorrer
+    if (currentIndex < rows.length) {
+        // Remover el color de fondo de la fila anterior
+        $("#numeros-list1 tbody tr").removeClass("selected");
+        // Obtener la fila actual
+        var currentRow = $(rows[currentIndex]);
+        // Hacer clic en la fila actual y obtener el número de la columna I
+        var numero = currentRow.find("td:eq(5)").text();
+        $("#numero").val(numero);
+        // Mostrar el contenido de las celdas correspondientes en los inputs
+        $("#A").val(currentRow.find("td:eq(1)").text());
+        $("#C").val(currentRow.find("td:eq(2)").text());
+        $("#D").val(currentRow.find("td:eq(3)").text());
+        $("#F").val(currentRow.find("td:eq(4)").text());
+
+        // Leer el contenido del archivo plantilla.txt
+        $.get("/obtenerPlantilla", function(plantilla) {
+            // Realizar la sustitución dinámica en la plantilla
+            plantilla = plantilla.replace(/\$\('#A'\)\.val\(\)/g, currentRow.find("td:eq(1)").text());
+            plantilla = plantilla.replace(/\$\('#C'\)\.val\(\)/g, currentRow.find("td:eq(2)").text());
+            plantilla = plantilla.replace(/\$\('#D'\)\.val\(\)/g, currentRow.find("td:eq(3)").text());
+            plantilla = plantilla.replace(/\$\('#F'\)\.val\(\)/g, currentRow.find("td:eq(4)").text());
+
+            // Actualizar el contenido de la plantilla con el contenido del archivo
+            $("#mensaje").val(plantilla);
+
+            // Hacer clic en la fila
+            currentRow.addClass("selected").click();
+            // Incrementar el índice para la próxima fila
+            currentIndex++;
+            // Calcular la posición del item seleccionado
+            var selectedPosition = currentIndex * itemHeight;
+            // Calcular la posición del scroll
+            var scrollPosition = Math.max(0, selectedPosition - $("#listaturnos").height() + itemHeight);
+            // Mover el scroll a la posición calculada
+            $("#listaturnos").scrollTop(scrollPosition);
+        });
+    }
+
+    // Mostrar cuadro de diálogo al final de la lista
+    if (currentIndex >= rows.length) {
+        $("#stopButton").click();
+      
+
+      //  $("#enviarMensajeForm")[0].reset();
+      $("#enviarMensajeForm")[0].reset();
+        currentIndex = 0;
+   
+    // Ejemplo de uso
+  //  document.getElementById("imagen3-tab").click();
+var pestañaSeleccionada = determinarPestanaSeleccionada();
+if (pestañaSeleccionada !== null) {
+  // alert("La pestaña seleccionada es: " + pestañaSeleccionada);
+   if (pestañaSeleccionada === "imagen1-tab") {
+        document.getElementById("imagen1-tab").click();
+    } else if (pestañaSeleccionada === "imagen2-tab") {
+        document.getElementById("imagen2-tab").click();
+    } else if (pestañaSeleccionada === "imagen3-tab") {
+        document.getElementById("imagen3-tab").click();
+    } else {
+        console.log("Ninguna pestaña está seleccionada o el ID de la pestaña seleccionada es desconocido.");
+    }
+
+
+
+    alert('Genial !! Todos los mensajes se enviaron correctamente .');
+
+} else {
+ // alert("Ninguna pestaña está seleccionada.");
+}
+
+
+
+    }
+}
+
+
+
+
+
+
+
+
+function determinarPestanaSeleccionada() {
+    var pestañas = ["imagen1-tab", "imagen2-tab", "imagen3-tab"];
+    var pestañaSeleccionada = null;
+
+    // Iterar sobre las pestañas para encontrar la seleccionada
+    pestañas.forEach(function(pestaña) {
+        var elemento = document.getElementById(pestaña);
+        if (elemento.classList.contains("active")) {
+            pestañaSeleccionada = pestaña;
+        }
+    });
+
+    // Devolver el ID de la pestaña seleccionada
+    return pestañaSeleccionada;
+}
+
+
+
+// Llama a la función para mostrar el alerta al ejecutar ALERTBOSS()
+
+
+
+
+function startAutoClick() {
+    // Detener el temporizador actual, si existe
+    clearInterval(timer);
+    // Obtener el valor del tiempo de envío seleccionado
+    var tiempoEnvio = parseInt($("#tiempoEnvio").val());
+    tiempoRestante = tiempoEnvio; // Establecer el tiempo restante inicial
+    
+    // Iniciar un nuevo temporizador para ejecutar la función autoClick() cada ciertos segundos
+    timer = setInterval(function() {
+        // Reducir el tiempo restante en cada iteración
+        actualizarContador(); // Actualizar el contador de tiempo restante
+   // Si el tiempo restante llega a cero, enviar el mensaje, llamar a autoClick() y restablecer el tiempo restante
+        if (tiempoRestante === 0) {
+          //  $("#contadordeenvio").text(0);
+            enviarMensaje(); // Envío de mensaje dentro del temporizador
+            autoClick();
+            tiempoRestante = tiempoEnvio; // Restablecer el tiempo restante al valor seleccionado
+        }
+    }, 1000); // Temporizador para ejecutar cada segundo
+}
+
+
+    // Función para actualizar el contador de tiempo restante
+    function actualizarContador() {
+        $("#contadordeenvio").text(tiempoRestante -1);
+     
+        if (tiempoRestante > 0) {
+         
+            tiempoRestante--;
+        }
+    }
+
+
+// Evento de clic para iniciar el recorrido automático al presionar el botón con id "startButton"
+$("#startButton").click(function() {
+    clearInterval(timer); // Detener el temporizador si estaba en ejecución
+    startAutoClick(); // Iniciar el recorrido automático
+    isTimerRunning = true; // Actualizar el estado del temporizador
+  
+    $("#estado").text("Enviando mensajes!").removeClass("text-warning").addClass("text-white blink");
+    $("#contador").removeClass("text-danger blink").addClass("text-white");
+    $(".btn-group-toggle input").prop("disabled", true);
+    
+    // Hacer parpadear solo el botón de inicio
+    $("#startButton").addClass("blink");
+    $("#stopButton, #pauseButton").removeClass("blink");
+});
+
+// Evento de clic para detener el temporizador al presionar el botón con id "stopButton"
+$("#stopButton").click(function() {
+    clearInterval(timer); // Detener el temporizador
+    isTimerRunning = false; // Actualizar el estado del temporizador
+    currentIndex = 0; // Restaurar el índice de la fila a cero
+    $("#numeros-list1 tbody tr").removeClass("selected"); // Deseleccionar la fila
+ 
+
+    $("#contadordeenvio").text("Detenido");
+    $("#estado").text("Detenido esperando acción..").removeClass("text-warning").addClass("text-white").addClass("blink");
+    $("#contador").removeClass("text-white").removeClass("text-warning blink").addClass("text-danger");
+    $(".btn-group-toggle input").prop("disabled", false);
+    
+    // Hacer parpadear solo el botón de detención
+    $("#stopButton").addClass("blink");
+    $("#startButton, #pauseButton").removeClass("blink");
+});
+
+// Evento de clic para pausar el temporizador al presionar el botón con id "pauseButton"
+$("#pauseButton").click(function() {
+    clearInterval(timer); // Detener el temporizador
+    isTimerRunning = false; // Actualizar el estado del temporizador
+    $("#contadordeenvio").text("Reanuda con (PLAY)");
+    $("#estado").text("En pausa..").removeClass("text-white").addClass("text-warning blink");
+    $("#contador").removeClass("text-danger").removeClass("text-white").addClass("text-warning blink");
+    
+    // Hacer parpadear solo el botón de pausa
+    $("#pauseButton").addClass("blink");
+    $("#startButton, #stopButton").removeClass("blink");
+});
+
+
+    // Función para cargar el número al hacer clic en una fila de la tabla
+    $("#numeros-list1 tbody tr").click(function() {
+        // Obtener el número de la columna I de la fila clicada
+        var numero = $(this).find("td:eq(5)").text();
+        // Colocar el número en el input correspondiente
+        $("#numero").val(numero);
+    });
+});
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+</script>
+<script>
+    // Evento de clic para cambiar el tiempo de envío a 5 segundos
+  // Evento de clic para cambiar el tiempo de envío a 5 segundos
+$("#option1").click(function() {
+    $("#tiempoEnvio").val(5); // Establecer el tiempo de envío a 5 segundos
+    tiempoRestante = 5; // Establecer el tiempo restante al valor seleccionado
+
+    // Hacer parpadear solo el botón seleccionado
+    $(this).parent().addClass("blink");
+    // Detener el parpadeo de los otros botones
+    $("#option2, #option3").parent().removeClass("blink");
+});
+
+// Evento de clic para cambiar el tiempo de envío a 10 segundos
+$("#option2").click(function() {
+    $("#tiempoEnvio").val(10); // Establecer el tiempo de envío a 10 segundos
+    tiempoRestante = 10; // Establecer el tiempo restante al valor seleccionado
+
+    // Hacer parpadear solo el botón seleccionado
+    $(this).parent().addClass("blink");
+    // Detener el parpadeo de los otros botones
+    $("#option1, #option3").parent().removeClass("blink");
+});
+
+// Evento de clic para cambiar el tiempo de envío a 60 segundos (1 minuto)
+$("#option3").click(function() {
+    $("#tiempoEnvio").val(1); // Establecer el tiempo de envío a 60 segundos (1 minuto)
+    tiempoRestante = 1; // Establecer el tiempo restante al valor seleccionado
+
+    // Hacer parpadear solo el botón seleccionado
+    $(this).parent().addClass("blink");
+    // Detener el parpadeo de los otros botones
+    $("#option1, #option2").parent().removeClass("blink");
+});
+
+function reemplazarTexto() {
+    // Obtener el texto ingresado por el usuario
+    var textoOriginal = document.getElementById("inputTextarea").value;
+
+    // Realizar los reemplazos según las reglas especificadas
+    var textoModificado = textoOriginal.replace(/\(A\)/g, "$('#A').val()");
+    textoModificado = textoModificado.replace(/\(C\)/g, "$('#C').val()");
+    textoModificado = textoModificado.replace(/\(D\)/g, "$('#D').val()");
+    textoModificado = textoModificado.replace(/\(F\)/g, "$('#F').val()");
+    textoModificado = textoModificado.replace(/\(I\)/g, "$('#I').val()");
+
+    // Mostrar el resultado en el segundo textarea
+    document.getElementById("outputTextarea").value = textoModificado;
+    
+    // Enviar los datos al servidor utilizando AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/guardarPlantilla', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+                console.log('Plantilla guardada correctamente');
+                alert('Plantilla guardada correctamente !!');
+            } else {
+                console.error('Error al guardar la plantilla:', xhr.responseText);
+            }
+        }
+    };
+    xhr.send(JSON.stringify({ contenido: textoModificado }));
+}
+
+
+
+</script>
+
+
+
+
+<script>
+    // Manejador de eventos para el envío del formulario
+    document.getElementById('formularioPlantilla').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evitar el envío del formulario por defecto
+
+        // Obtener el contenido del textarea
+        var contenido = document.getElementById('outputTextarea').value;
+
+        // Enviar los datos al servidor utilizando AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/guardarPlantilla', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    console.log('Plantilla guardada correctamente');
+                } else {
+                    console.error('Error al guardar la plantilla:', xhr.responseText);
+                }
+            }
+        };
+        xhr.send(JSON.stringify({ contenido: contenido }));
+    });
+</script>
+
+
+
+
+<script>
+    // Event listener para el botón T1
+    document.getElementById('T1').addEventListener('click', function() {
+        agregarTexto('(A)');
+    });
+
+    // Event listener para el botón T2
+    document.getElementById('T2').addEventListener('click', function() {
+        agregarTexto('(C)');
+    });
+
+    // Event listener para el botón T3
+    document.getElementById('T3').addEventListener('click', function() {
+        agregarTexto('(D)');
+    });
+
+    // Event listener para el botón T4
+    document.getElementById('T4').addEventListener('click', function() {
+        agregarTexto('(F)');
+    });
+
+// Función para agregar texto al textarea en la posición del cursor
+function agregarTexto(texto) {
+    var outputTextarea = document.getElementById('inputTextarea');
+    // Obtener la posición actual del cursor
+    var posicionCursor = outputTextarea.selectionStart;
+    // Obtener el contenido del textarea
+    var contenido = outputTextarea.value;
+    // Insertar el texto en la posición del cursor
+    var nuevoContenido = contenido.slice(0, posicionCursor) + texto + contenido.slice(posicionCursor);
+    // Actualizar el valor del textarea con el nuevo contenido
+    outputTextarea.value = nuevoContenido;
+    // Colocar el cursor al final del texto insertado
+    outputTextarea.selectionStart = outputTextarea.selectionEnd = posicionCursor + texto.length;
+    // Colocar el foco en el textarea
+    outputTextarea.focus();
+}
+
+    $(document).ready(function() {
+    // Hacer parpadear el botón seleccionado al cargar la página
+    $("#stopButton").addClass("blink");
+    $("#option1").parent().addClass("blink");
+
+    // Otras funciones que desees ejecutar al cargar la página...
+  
+    });
+  
+
+    $('#uploadButton').click(function() { // Cuando se hace clic en el botón de subir archivo
+        var file = $('#file1')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+      
+        $.ajax({
+            url: '/guardar-archivo',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                console.log('Archivo guardado correctamente.');
+                $('#recargar').click();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo:', error);
+            }
+        });
+    });
+
+
+
+
+    $('#uploadButton2').click(function() { // Cuando se hace clic en el botón de subir archivo 2
+        document.getElementById("imagen1-tab").click();
+        var file = $('#file2')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+        
+        $.ajax({
+            url: '/imagen1', // Ruta en el servidor para manejar el archivo
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                console.log('Archivo 2 guardado correctamente.');
+                $('#imagenA').attr('src', 'imagen/LOAD.gif');
+
+// Esperar 5 segundos y luego cambiar la imagen a 'imagen/1.gif'
+setTimeout(function() {
+    $('#imagenA').attr('src', 'imagen/1.gif?timestamp=' + new Date().getTime());
+}, 5000); // 5000 milisegundos = 5 segundos
+
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo 2:', error);
+            }
+        });
+    });
+
+
+
+    $('#uploadButton3').click(function() { // Cuando se hace clic en el botón de subir archivo 3
+        document.getElementById("imagen2-tab").click();
+        var file = $('#file3')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+       
+        $.ajax({
+            url: '/imagen3', // Ruta en el servidor para manejar el archivo 3
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                console.log('Archivo 3 guardado correctamente.');
+                $('#imagenB').attr('src', 'imagen/LOAD.gif');
+
+// Esperar 3 segundos y luego cambiar la imagen a 'imagen/1.gif'
+setTimeout(function() {
+    $('#imagenB').attr('src', 'imagen/2.gif?timestamp=' + new Date().getTime());
+}, 5000); // 3000 milisegundos = 3 segundos
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo 3:', error);
+            }
+        });
+    });
+
+
+    $('#uploadButton4').click(function() { // Cuando se hace clic en el botón de subir archivo 4
+        document.getElementById("imagen3-tab").click();
+      
+        var file = $('#file4')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+            url: '/imagen4', // Ruta en el servidor para manejar el archivo 4
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                console.log('Archivo 4 guardado correctamente.');
+                // Llamar a la función para recargar las pestañas
+                $('#imagenC').attr('src', 'imagen/LOAD.gif');
+
+// Esperar 3 segundos y luego cambiar la imagen a 'imagen/1.gif'
+setTimeout(function() {
+    $('#imagenC').attr('src', 'imagen/3.gif?timestamp=' + new Date().getTime());
+}, 5000); // 3000 milisegundos = 3 segundos
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo 4:', error);
+            }
+        });
+    });
+
+
+
+    $(document).ready(function() {
+        $('#restartServerButton').click(function() {
+            alert('Reiniciando el servidor !!');
+            $.ajax({
+                url: '/restart-server', // Ruta en el servidor para reiniciar el servidor
+                type: 'GET',
+                success: function(response) {
+                    console.log('El servidor se reinició correctamente.');
+                    // Puedes hacer alguna acción adicional aquí si es necesario
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al reiniciar el servidor:', error);
+                }
+            });
+        });
+    });
+
+
+
+
+
+</script>
+<script>
+    document.getElementById('updateNumberForm').addEventListener('submit', function(event) {
+        alert('Se cambio con exito el numero que recibe el mensaje test de conexion y bienvenida exitosa .. a continuacion se reiniciara el server , escanee el nuevo QR Cuando este disponible y poder usar su nuevo dispositivo !!')
+    
+        event.preventDefault();
+        
+        var newNumber = document.getElementById('newNumber').value;
+      
+        // Enviar el nuevo número al servidor
+        fetch('/update-number', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ newNumber: newNumber })
+        })
+        .then(response => {
+            if (response.ok) {
+                console.log('Número actualizado correctamente.');
+                      } else {
+                console.error('Error al actualizar el número.');
+            }
+        })
+        .catch(error => {
+            console.error('Error de red:', error);
+        });
+    });
+</script>
+<script>
+// Recargar el contenido de las pestañas
+// Función para recargar las imágenes en las pestañas
+function recargarPestanas() {
+    // Nuevas rutas de las imágenes
+    var nuevaImagen1 = 'imagen/1.gif';
+    var nuevaImagen2 = 'imagen/2.gif';
+    var nuevaImagen3 = 'imagen/3.gif';
+
+    // Actualizar la imagen en la pestaña 1
+    $('#imagen1').find('img').attr('src', nuevaImagen1);
+
+    // Actualizar la imagen en la pestaña 2
+    $('#imagen2').find('img').attr('src', nuevaImagen2);
+
+    // Actualizar la imagen en la pestaña 3
+    $('#imagen3').find('img').attr('src', nuevaImagen3);
+}
+
+
+
+
+
+$('#recargar').click(function() {
+       // Limpiar la tabla antes de agregar los nuevos datos
+       $('#numeros-list1 tbody').empty();
+    // Realizar una solicitud AJAX para obtener los nuevos datos de la tabla
+    $.ajax({
+        url: '/actualizarTabla', // Ruta en el servidor para obtener los nuevos datos de la tabla
+        type: 'GET',
+        success: function(response) {
+         
+
+            // Llenar la tabla con los nuevos datos
+            response.rowData.forEach((row, index) => {
+                var newRow = $('<tr>');
+                newRow.append('<td>' + index + '</td>'); // Número de fila
+                row.forEach(cell => {
+                    newRow.append('<td style="border-bottom: 1px solid black;">' + cell + '</td>');
+                });
+                $('#numeros-list1 tbody').append(newRow);
+            });
+          
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al cargar los nuevos datos de la tabla:', error);
+        }
+    });
+});
+
+
+function actualizarImagen(valor) {
+        // Actualizar el valor del segundo input con el mismo valor que el primer input
+        document.getElementById("imagena").value = valor;
+
+
+
+    }
+
+
+  
+</script>
+
+</body>
+</html>

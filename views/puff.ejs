@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control PUSHISAP</title>
+    <!-- Agregamos Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+    <style>
+        /* Establecer altura del 100% para html y body */
+        html, body {
+            height: 100%;
+        }
+
+        /* Estilos personalizados para el panel de control */
+        .panel-section {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .panel-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        /* Estilos para la barra lateral */
+        .sidebar {
+            background-color: #007bff; /* Color azul */
+            color: white; /* Texto en blanco */
+            padding-top: 20px;
+            padding-bottom: 20px;
+            width: 601px;
+        }
+        #listaturnos {
+        color: chartreuse;
+        background-color: black;
+        max-height: calc(100vh - 140px); /* Altura máxima igual a la altura de la ventana menos el padding superior e inferior de la barra lateral */
+        overflow-y: scroll;
+        overflow-x: scroll;
+    }
+
+    #numeros-list1 {
+        font-size: 12px;
+        width: 2900px;
+        max-height: calc(100vh - 140px); 
+    }
+
+   #plantidiv{
+    width: 220px;
+   }
+            /* Estilos para la barra lateral */
+    
+        .col-lg-9 {
+        width:calc(100% - 601px); /* Asigna el ancho deseado */
+        /* Puedes ajustar el ancho según tus necesidades */
+    }
+ 
+    .blink {
+        animation: blink-animation 1s steps(5, start) infinite;
+        -webkit-animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+
+    @-webkit-keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+
+
+    #startButton{
+width: 90px;
+    }   
+    #pauseButton{
+        width: 90px;
+    }   
+    #stopButton{
+        width: 90px;
+    }      
+
+
+    .selected {
+        background-color: rgb(119, 14, 231); /* Cambiar al color que desees */
+    }
+
+  
+    #reemplazarTexto {
+        display: none; /* Ocultar el botón */
+    }
+        /* Estilo para agregar más espacio entre los archivos */
+        #arbol ul li {
+            margin-bottom: 8px; /* Ajusta este valor según sea necesario */
+        }
+
+
+    #outputTextarea,
+    #guardarPlantilla,
+    #plantillabase,
+    #eliminarplantilla {
+      display: none;
+    }
+
+
+
+   
+</style>
+</head>
+<body>
+    <div class="container-fluid h-100"> <!-- Establecer altura del 100% para el contenedor principal -->
+        <div class="row h-100"> <!-- Establecer altura del 100% para la fila -->
+            <!-- Barra lateral -->
+            <div class="col-lg-3 sidebar">
+          
+                <div style="display: flex; align-items: center;">
+                    <img src="http://localhost:3000/IMAGEN/LOGO.GIF" alt="Descripción de la imagen" width="150" height="80">
+                    <div id="contador" style="margin-left: auto; font-size: 80px; font-family: 'Comic Sans MS', cursive;">0</div>
+                   
+                </div>
+                <br>Próximo mensaje en: <span id="contadordeenvio"> espera</span>
+           
+                
+            <hr>
+                <div class="mb-3">
+                    <label for="tiempoEnvio" class="form-label">Tiempo de envío:</label>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-primary active">
+                            <input type="radio" name="options" id="option1" autocomplete="off" checked> STANDARD
+                            <div class="tiempodeenvio"> 5(seg)</div>
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="option2" autocomplete="off"> RANDOM
+                            <div class="tiempodeenvio"> 1-15(seg)</div>
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="option3" autocomplete="off"> SUPERFAST
+                            <div class="tiempodeenvio">1(SEG)</div>
+                        </label>
+                    </div>
+
+                 
+                    <input type="number" class="form-control" id="tiempoEnvio" name="tiempoEnvio" value="5" required hidden>
+                    <div id="erro8"></div>
+                    <br>     <hr>   
+                    <div id="estado" style="margin-left: auto; font-size: 20px; font-family: 'Comic Sans MS', cursive;"></div>      
+<hr>
+                </div>
+                <label for="tiempoEnvio" class="form-label">Controles de accion:</label>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <button id="startButton" class="btn btn-success" disabled><i class='bx bx-play'></i></button>
+                <button id="pauseButton" class="btn btn-warning"><i class='bx bx-pause'></i></button>             
+                <button id="stopButton" class="btn btn-danger"><i class='bx bx-stop'></i></button>
+                </div>
+<hr>
+<br><br>
+                
+
+<button id="recargar" style="display: none;">Recargar</button>
+
+              <div id="listaturnos" style="color: chartreuse; background-color: black; height:800px; overflow-y: scroll; overflow-x: scroll;">
+                <table id="numeros-list1" style="font-size: 12px; width: 2900px;">
+                    <thead>
+                        <tr>
+                            <th>#</th> <!-- Nueva columna para el número de fila -->
+                            <th>Columna A</th>
+                            <th>Columna B</th>
+                            <th>Columna C</th>
+                            <th>Columna D</th>
+                            <th>Columna E</th>
+                            <th>Columna F</th>
+                            <th>Columna G</th>
+                            <th>Columna H</th>
+                            <th>Columna I</th>
+                            <th>Columna J</th>
+                            <th>Columna K</th>
+                            <th>Columna L</th>
+                            <th>Columna M</th>
+                            <th>Columna N</th>
+                            <th>Columna O</th>
+                            <th>Columna P</th>
+                            <th>Columna Q</th>
+                            <th>Columna R</th>
+                            <th>Columna S</th>
+                            <th>Columna T</th>
+                            <th>Columna U</th>
+                            <th>Columna V</th>
+                            <th>Columna W</th>
+                            <th>Columna X</th>
+                            <th>Columna Y</th>
+                            <th>Columna Z</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% rowData.forEach((row, index) => { %>
+                            <tr>
+                                <td><%= index %></td> <!-- Muestra el número de fila -->
+                                <% row.forEach(cell => { %>
+                                    <td style="border-bottom: 1px solid black;"><%= cell %></td>
+                                <% }); %>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+         
+            </div>
+
+          
+
+
+            <!-- Contenido principal -->
+            <div class="col-lg-9">
+                <!-- Pestañas -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="mensajero-tab" data-bs-toggle="tab" data-bs-target="#mensajero" type="button" role="tab" aria-controls="mensajero" aria-selected="true">MENSAJERO</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="configuracion-tab" data-bs-toggle="tab" data-bs-target="#configuracion" type="button" role="tab" aria-controls="configuracion" aria-selected="false">CONFIGURACION</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <!-- Pestaña 1: Mensajero -->
+                    <div class="tab-pane fade show active" id="mensajero" role="tabpanel" aria-labelledby="mensajero-tab">
+                        <div class="panel-section">
+                         
+                   <h3>       <div id="estadoqr" class="text-danger">PUSHSAP DESCONECTADO</div></h3> 
+            
+                
+
+                            <hr>
+                            <div id="qrContainer">
+                                <h1>Escanea el siguiente código QR con WhatsApp</h1>
+                                <img id="qrCodeImage" src="<%= qrCode %>" alt="WhatsApp QR Code">
+                            </div>
+                            <div id="statusMessage" style="display: none;"></div>
+                             
+        
+
+                     
+
+
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="card-title">Configuracion</h5> <!-- Título en la esquina superior izquierda -->
+                                </div>
+                                <div class="card-body d-flex">
+
+
+
+
+   <!-- Ficha 0 -->
+   <div id="plantidiv" class="card mr-3">
+    <div class="card-header">
+        <h5 class="card-title">Dir plantillas</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <input id="plantillabase" value="Dir plantillas">
+    <div class="card-body">
+        <div id="tree"></div>
+        
+        
+    </div>
+</div>
+
+
+
+
+                                    <!-- Ficha 1 -->
+                                    <div class="card mr-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Editor Plantilla</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body" style="background-color: #007bff;">
+                                            <div class="card-header">
+                                                <h5 class="card-title ">Integrar contenido de la Celda</h5> <!-- Título en la esquina superior izquierda -->
+                                          
+                                          
+                                            <button id="T1" class="btn btn-primary">A</button>
+                                            <button id="T2" class="btn btn-primary">B</button>
+                                            <button id="T3" class="btn btn-primary">C</button>
+                                            <button id="T4" class="btn btn-primary">D</button>
+                                            <button id="T5" class="btn btn-primary">E</button>
+                                            <button id="T6" class="btn btn-primary">F</button>
+                                            <button id="T7" class="btn btn-primary">G</button>
+                                            <button id="T8" class="btn btn-primary">H</button>
+                                            <button id="T9" class="btn btn-primary">I</button>
+                                            <button id="T10" class="btn btn-primary">J</button>
+                                            <button id="T11" class="btn btn-primary">K</button>
+                                            <button id="T12" class="btn btn-primary">L</button>
+                                            <button id="T13" class="btn btn-primary">M</button><br>
+                                            <button id="T14" class="btn btn-primary">N</button>
+                                            <button id="T15" class="btn btn-primary">O</button>
+                                            <button id="T16" class="btn btn-primary">P</button>
+                                            <button id="T17" class="btn btn-primary">Q</button>
+                                            <button id="T18" class="btn btn-primary">R</button>
+                                            <button id="T19" class="btn btn-primary">S</button>
+                                            <button id="T20" class="btn btn-primary">T</button>
+                                            <button id="T21" class="btn btn-primary">U</button>
+                                            <button id="T22" class="btn btn-primary">V</button>
+                                            <button id="T23" class="btn btn-primary">W</button>
+                                            <button id="T24" class="btn btn-primary">X</button>
+                                            <button id="T25" class="btn btn-primary">Y</button>
+                                            <button id="T26" class="btn btn-primary">Z</button>
+                                            <br>
+                                        </div>
+                                            <textarea id="inputTextarea" rows="4" cols="50" style="width: 600px; height: 300px;"></textarea>
+                                            <br>
+                                            <button id="reemplazarTexto" onclick="reemplazarTexto()" class="btn btn-primary">Guardar la plantilla</button>
+                                            
+
+<form id="formularioPlantilla">
+    <textarea id="outputTextarea" rows="4" cols="50"></textarea>
+    <button  id="guardarPlantilla" type="submit">Guardar Plantilla</button>
+</form>
+
+<button  id="test" type="submit"  class="btn btn-warning">TEST AUTO MENSAJE</button>
+<button id="guardarPlantillaBtn" type="submit" class="btn btn-primary">Guardar Plantilla</button>
+<button  id="eliminarplantilla" type="submit"  class="btn btn-danger">Eliminar la plantilla</button>
+
+
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Ficha 2 -->
+                                    <div class="card mr-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title">IMG Mensaje</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body">
+                                          
+                                            
+                                            <ul class="nav nav-tabs" id="customTab" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="imagen1-tab" data-bs-toggle="tab" data-bs-target="#imagen1" type="button" role="tab" aria-controls="imagen1" aria-selected="true" onclick="cargarImagen('imagen/1.gif')">Imagen 1</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen2-tab" data-bs-toggle="tab" data-bs-target="#imagen2" type="button" role="tab" aria-controls="imagen2" aria-selected="false" onclick="cargarImagen('imagen/2.gif')">Imagen 2</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen3-tab" data-bs-toggle="tab" data-bs-target="#imagen3" type="button" role="tab" aria-controls="imagen3" aria-selected="false" onclick="cargarImagen('imagen/3.gif')">Imagen 3</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen4-tab" data-bs-toggle="tab" data-bs-target="#imagen4" type="button" role="tab" aria-controls="imagen4" aria-selected="false" onclick="cargarImagen($('#miInput').val())">IMG URL</button>
+                                                </li>
+                                            </ul>
+                                        
+                                            <!-- Contenido de las pestañas personalizadas -->
+                                            <div class="tab-content" id="customTabContent">
+                                                <!-- Pestaña 1: Imagen 1 -->
+                                                <div class="tab-pane fade show active" id="imagen1" role="tabpanel" aria-labelledby="imagen1-tab">
+                                                    <img id="imagenA" src="imagen/1.gif" alt="Descripción de la imagen 1" style="width: 380px; height: 286px;">
+                                                </div>
+                                        
+                                                <!-- Pestaña 2: Imagen 2 -->
+                                                <div class="tab-pane fade" id="imagen2" role="tabpanel" aria-labelledby="imagen2-tab">
+                                                    <img id="imagenB" src="imagen/2.gif" alt="Descripción de la imagen 2" style="width: 380px; height: 286px;">
+                                                </div>
+                                        
+                                                <!-- Pestaña 3: Imagen 3 -->
+                                                <div class="tab-pane fade" id="imagen3" role="tabpanel" aria-labelledby="imagen3-tab">
+                                                    <img id="imagenC" src="imagen/3.gif" alt="Descripción de la imagen 3" style="width: 380px; height: 286px;">
+                                                </div>
+                                                 <!-- Pestaña 4: Imagen 4-->
+                                                 <div class="tab-pane fade" id="imagen4" role="tabpanel" aria-labelledby="imagen4-tab">
+                                                    IMG CON URL
+                                                    <br><BR>
+                                                    <input type="checkbox" id="miCheckbox" name="miCheckbox" value="valor" >
+                                                      <input type="text" id="miInput" name="miInput" placeholder="INTRODUCE URL DE IMG" oninput="actualizarImagen(this.value)">
+
+                                                          </div>
+                                            </div>
+                                        </div>
+                                    
+                                        
+
+                                    </div>
+                                    
+                              
+
+
+
+
+                                </div>
+                            </div>
+                            
+                            <!-- Campo de entrada para la URL de la imagen -->
+                   
+                            
+                            <script>
+                                // Función para cargar la imagen correspondiente al hacer clic en la pestaña
+                                function cargarImagen(url) {
+                                    document.getElementById('imagena').value = url;
+                                }
+                            </script>
+                            
+
+
+                            
+
+
+                            <form id="enviarMensajeForm">
+
+
+                                <div class="d-flex">
+                                    <!-- Ficha 1 -->
+                                    <div class="card mb-3 d-inline-block">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Celdas del Excel</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body" style="overflow-y: scroll; max-height: 800px;">
+                                     
+                                            <div class="mb-3"><label for="A" class="form-label">CELDA A:</label><input type="text" class="form-control" id="A" name="A" required></div>
+                                            <div class="mb-3"><label for="B" class="form-label">CELDA B:</label><input type="text" class="form-control" id="B" name="B" required></div>
+                                            <div class="mb-3"><label for="C" class="form-label">CELDA C:</label><input type="text" class="form-control" id="C" name="C" required></div>
+                                            <div class="mb-3"><label for="D" class="form-label">CELDA D:</label><input type="text" class="form-control" id="D" name="D" required></div>
+                                            <div class="mb-3"><label for="E" class="form-label">CELDA E:</label><input type="text" class="form-control" id="E" name="E" required></div>
+                                            <div class="mb-3"><label for="F" class="form-label">CELDA F:</label><input type="text" class="form-control" id="F" name="F" required></div>
+                                            <div class="mb-3"><label for="G" class="form-label">CELDA G:</label><input type="text" class="form-control" id="G" name="G" required></div>
+                                            <div class="mb-3"><label for="H" class="form-label">CELDA H:</label><input type="text" class="form-control" id="H" name="H" required></div>
+                                            <div class="mb-3"><label for="I" class="form-label">CELDA I:</label><input type="text" class="form-control" id="I" name="I" required></div>
+                                            <div class="mb-3"><label for="J" class="form-label">CELDA J:</label><input type="text" class="form-control" id="J" name="J" required></div>
+                                            <div class="mb-3"><label for="K" class="form-label">CELDA K:</label><input type="text" class="form-control" id="K" name="K" required></div>
+                                            <div class="mb-3"><label for="L" class="form-label">CELDA L:</label><input type="text" class="form-control" id="L" name="L" required></div>
+                                            <div class="mb-3"><label for="M" class="form-label">CELDA M:</label><input type="text" class="form-control" id="M" name="M" required></div>
+                                            <div class="mb-3"><label for="N" class="form-label">CELDA N:</label><input type="text" class="form-control" id="N" name="N" required></div>
+                                            <div class="mb-3"><label for="O" class="form-label">CELDA O:</label><input type="text" class="form-control" id="O" name="O" required></div>
+                                            <div class="mb-3"><label for="P" class="form-label">CELDA P:</label><input type="text" class="form-control" id="P" name="P" required></div>
+                                            <div class="mb-3"><label for="Q" class="form-label">CELDA Q:</label><input type="text" class="form-control" id="Q" name="Q" required></div>
+                                            <div class="mb-3"><label for="R" class="form-label">CELDA R:</label><input type="text" class="form-control" id="R" name="R" required></div>
+                                            <div class="mb-3"><label for="S" class="form-label">CELDA S:</label><input type="text" class="form-control" id="S" name="S" required></div>
+                                            <div class="mb-3"><label for="T" class="form-label">CELDA T:</label><input type="text" class="form-control" id="T" name="T" required></div>
+                                            <div class="mb-3"><label for="U" class="form-label">CELDA U:</label><input type="text" class="form-control" id="U" name="U" required></div>
+                                            <div class="mb-3"><label for="V" class="form-label">CELDA V:</label><input type="text" class="form-control" id="V" name="V" required></div>
+                                            <div class="mb-3"><label for="W" class="form-label">CELDA W:</label><input type="text" class="form-control" id="W" name="W" required></div>
+                                            <div class="mb-3"><label for="X" class="form-label">CELDA X:</label><input type="text" class="form-control" id="X" name="X" required></div>
+                                            <div class="mb-3"><label for="Y" class="form-label">CELDA Y:</label><input type="text" class="form-control" id="Y" name="Y" required></div>
+                                            <div class="mb-3"><label for="Z" class="form-label">CELDA Z:</label><input type="text" class="form-control" id="Z" name="Z" required></div>
+                                        </div>
+                                    </div>
+                                  
+                                    <!-- Ficha 2 -->
+                                    <div class="card mb-3 d-inline-block flex-grow-1">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Mensaje</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="mb-3">
+                                                <label for="imagena" class="form-label">Imagen:</label>
+                                                <input type="text" class="form-control" id="imagena" name="imagena" value="imagen/1.gif" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="pais" class="form-label">País +:</label>
+                                                <input type="text" class="form-control" id="pais" name="pais" value="549" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="cod" class="form-label">Característica:</label>
+                                                <input type="text" class="form-control" id="cod" name="cod" value="351" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="numero" class="form-label">Número ( TELEFONO DESTINO ):</label>
+                                             
+                                                <input type="text" class="form-control" id="numero" name="numero" required>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label for="mensaje" class="form-label">Mensaje:</label>
+                                                <textarea class="form-control" id="mensaje" name="mensaje" style="height: 300px;" required></textarea>
+
+
+                                            </div>
+                                            <!-- Botón de enviar -->
+                                            <button type="button" id="enviarmensaje" class="btn btn-primary" onclick="enviarMensaje()">Enviar Mensaje</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+    
+                            </form>
+                            
+                        </div>
+                    </div>
+                    <!-- Pestaña 2: Configuración -->
+              <!-- Pestaña 2: Configuración -->
+              <div class="tab-pane fade" id="configuracion" role="tabpanel" aria-labelledby="configuracion-tab">
+                <div class="panel-section">
+                    <h2 class="panel-title">CONFIGURACION</h2>
+            
+                    <!-- Ficha 3 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Upload</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="file1" class="form-label">(EXCEL)</label>
+            <input type="file" class="form-control-file" id="file1" name="file1" accept=".xlsx" required>
+            <button id="uploadButton" class="btn btn-primary">Subir XLSX</button> <!-- Botón para subir el archivo -->
+        </div>
+       
+      <!-- Archivo 2 -->
+<div class="mb-3">
+    <label for="file2" class="form-label">(GIF 1):</label>
+    <input type="file" class="form-control-file" id="file2" name="file2" accept=".gif" required>
+    <button id="uploadButton2" class="btn btn-primary">Subir GIF 1</button> <!-- Botón para subir el archivo 2 -->
+</div>
+
+
+     <!-- Archivo 3 -->
+<div class="mb-3">
+    <label for="file3" class="form-label">(GIF 2):</label>
+    <input type="file" class="form-control-file" id="file3" name="file3" accept=".gif" required>
+    <button id="uploadButton3" class="btn btn-primary">Subir GIF 2</button> <!-- Botón para subir el archivo 3 -->
+</div>
+
+
+      <!-- Archivo 4 -->
+<div class="mb-3">
+    <label for="file4" class="form-label">(GIF 3):</label>
+    <input type="file" class="form-control-file" id="file4" name="file4" accept=".gif" required>
+    <button id="uploadButton4" class="btn btn-primary">Subir GIF 3</button> <!-- Botón para subir el archivo 4 -->
+</div>
+
+
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Server</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <div class="card-body">
+    
+        <button id="restartServerButton" class="btn btn-danger">Reiniciar Servidor</button>
+        <br><hr>
+        <form id="updateNumberForm">
+         <label for="newNumber">NUMERO QUE RECIBE MENSAJE DE CONEXION:</label><br>
+         <input type="text" id="newNumber" name="newNumber" required><br><br>
+         <button type="submit" class="btn btn-danger">Actualizar número</button>
+     </form>
+     <br><hr>
+     <label for="newNumber">LETRA DE COLUMNA DONDE SE ENCUENTRA EL TELEFONO DEL USER (EN LA LISTA):</label><br>
+     <input type="hidden" class="form-control" id="FILA" name="FILA" value="<%= FILAN %>" required>
+
+     <input type="text" class="form-control" id="FILAN" name="FILAN" value="<%= FILA %>" required><br>
+     <button id="guardarfila" class="btn btn-danger">Guardar</button>
+    </div>
+</div>
+
+                </div>
+            </div>
+            
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>

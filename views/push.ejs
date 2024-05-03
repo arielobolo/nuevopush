@@ -1,0 +1,1996 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Control PUSHISAP</title>
+    <!-- Agregamos Bootstrap CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  
+    <style>
+        /* Establecer altura del 100% para html y body */
+        html, body {
+            height: 100%;
+        }
+
+        /* Estilos personalizados para el panel de control */
+        .panel-section {
+            margin-bottom: 30px;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .panel-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        /* Estilos para la barra lateral */
+        .sidebar {
+            background-color: #007bff; /* Color azul */
+            color: white; /* Texto en blanco */
+            padding-top: 20px;
+            padding-bottom: 20px;
+            width: 601px;
+        }
+        #listaturnos {
+        color: chartreuse;
+        background-color: black;
+        max-height: calc(100vh - 140px); /* Altura máxima igual a la altura de la ventana menos el padding superior e inferior de la barra lateral */
+        overflow-y: scroll;
+        overflow-x: scroll;
+    }
+
+    #numeros-list1 {
+        font-size: 12px;
+        width: 2900px;
+        max-height: calc(100vh - 140px); 
+    }
+
+   #plantidiv{
+    width: 220px;
+   }
+            /* Estilos para la barra lateral */
+    
+        .col-lg-9 {
+        width:calc(100% - 601px); /* Asigna el ancho deseado */
+        /* Puedes ajustar el ancho según tus necesidades */
+    }
+ 
+    .blink {
+        animation: blink-animation 1s steps(5, start) infinite;
+        -webkit-animation: blink-animation 1s steps(5, start) infinite;
+    }
+
+    @keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+
+    @-webkit-keyframes blink-animation {
+        to {
+            visibility: hidden;
+        }
+    }
+
+
+    #startButton{
+width: 90px;
+    }   
+    #pauseButton{
+        width: 90px;
+    }   
+    #stopButton{
+        width: 90px;
+    }      
+
+
+    .selected {
+        background-color: rgb(119, 14, 231); /* Cambiar al color que desees */
+    }
+
+  
+    #reemplazarTexto {
+        display: none; /* Ocultar el botón */
+    }
+        /* Estilo para agregar más espacio entre los archivos */
+        #arbol ul li {
+            margin-bottom: 8px; /* Ajusta este valor según sea necesario */
+        }
+
+
+    #outputTextarea,
+    #guardarPlantilla,
+    #plantillabase,
+    #eliminarplantilla {
+      display: none;
+    }
+
+
+    .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .estadoqr {
+            margin-right: auto;
+        }
+
+   
+</style>
+</head>
+<body>
+
+
+      
+    <div class="container-fluid h-100"> <!-- Establecer altura del 100% para el contenedor principal -->
+        <div class="row h-100"> <!-- Establecer altura del 100% para la fila -->
+            <!-- Barra lateral -->
+            <div class="col-lg-3 sidebar">
+          
+                <div style="display: flex; align-items: center;">
+                    <img src="http://localhost:3000/IMAGEN/LOGO.GIF" alt="Descripción de la imagen" width="150" height="80">
+                    <div id="contador" style="margin-left: auto; font-size: 80px; font-family: 'Comic Sans MS', cursive;">0</div>
+                   
+                </div>
+                <br>Próximo mensaje en: <span id="contadordeenvio"> espera</span>
+           
+                
+            <hr>
+                <div class="mb-3">
+                    <label for="tiempoEnvio" class="form-label">Tiempo de envío:</label>
+                    <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                        <label class="btn btn-primary active">
+                            <input type="radio" name="options" id="option1" autocomplete="off" checked> STANDARD
+                            <div class="tiempodeenvio"> 5(seg)</div>
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="option2" autocomplete="off"> RANDOM
+                            <div class="tiempodeenvio"> 1-15(seg)</div>
+                        </label>
+                        <label class="btn btn-primary">
+                            <input type="radio" name="options" id="option3" autocomplete="off"> SUPERFAST
+                            <div class="tiempodeenvio">1(SEG)</div>
+                        </label>
+                    </div>
+
+                 
+                    <input type="number" class="form-control" id="tiempoEnvio" name="tiempoEnvio" value="5" required hidden>
+                    <div id="erro8"></div>
+                    <br>     <hr>   
+                    <div id="estado" style="margin-left: auto; font-size: 20px; font-family: 'Comic Sans MS', cursive;"></div>      
+<hr>
+                </div>
+                <label for="tiempoEnvio" class="form-label">Controles de accion:</label>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                <button id="startButton" class="btn btn-success" disabled><i class='bx bx-play'></i></button>
+                <button id="pauseButton" class="btn btn-warning"><i class='bx bx-pause'></i></button>             
+                <button id="stopButton" class="btn btn-danger"><i class='bx bx-stop'></i></button>
+                </div>
+<hr>
+<br><br>
+                
+
+<button id="recargar" style="display: none;">Recargar</button>
+
+              <div id="listaturnos" style="color: chartreuse; background-color: black; height:800px; overflow-y: scroll; overflow-x: scroll;">
+                <table id="numeros-list1" style="font-size: 12px; width: 2900px;">
+                    <thead>
+                        <tr>
+                            <th>#</th> <!-- Nueva columna para el número de fila -->
+                            <th>Columna A</th>
+                            <th>Columna B</th>
+                            <th>Columna C</th>
+                            <th>Columna D</th>
+                            <th>Columna E</th>
+                            <th>Columna F</th>
+                            <th>Columna G</th>
+                            <th>Columna H</th>
+                            <th>Columna I</th>
+                            <th>Columna J</th>
+                            <th>Columna K</th>
+                            <th>Columna L</th>
+                            <th>Columna M</th>
+                            <th>Columna N</th>
+                            <th>Columna O</th>
+                            <th>Columna P</th>
+                            <th>Columna Q</th>
+                            <th>Columna R</th>
+                            <th>Columna S</th>
+                            <th>Columna T</th>
+                            <th>Columna U</th>
+                            <th>Columna V</th>
+                            <th>Columna W</th>
+                            <th>Columna X</th>
+                            <th>Columna Y</th>
+                            <th>Columna Z</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% rowData.forEach((row, index) => { %>
+                            <tr>
+                                <td><%= index %></td> <!-- Muestra el número de fila -->
+                                <% row.forEach(cell => { %>
+                                    <td style="border-bottom: 1px solid black;"><%= cell %></td>
+                                <% }); %>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+
+
+           <!-- En tu archivo arbol.ejs -->
+
+
+
+
+
+            </div>
+         
+            </div>
+
+          
+
+
+            <!-- Contenido principal -->
+            <div class="col-lg-9">
+                <!-- Pestañas -->
+                <ul class="nav nav-tabs" id="myTab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="mensajero-tab" data-bs-toggle="tab" data-bs-target="#mensajero" type="button" role="tab" aria-controls="mensajero" aria-selected="true">CONFIG MENSAJE AUTOMATICO </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="configuracion-tab" data-bs-toggle="tab" data-bs-target="#configuracion1" type="button" role="tab" aria-controls="configuracion1" aria-selected="false">MENSAJES INDIVIDUALES</button>
+                    </li>
+          
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="configuracion-tab" data-bs-toggle="tab" data-bs-target="#configuracion" type="button" role="tab" aria-controls="configuracion" aria-selected="false">CONFIGURACION DE SISTEMA</button>
+                    </li>
+                </ul>
+                <div class="tab-content" id="myTabContent">
+                    <!-- Pestaña 1: Mensajero -->
+                    <div class="tab-pane fade show active" id="mensajero" role="tabpanel" aria-labelledby="mensajero-tab">
+                        <div class="panel-section">
+                         
+                            <div class="container">
+                                <h3 class="estadoqr"><div id="estadoqr" class="text-danger">PUSHSAP DESCONECTADO</div></h3>
+                                <div class="fecha-hora">
+                                    <p>Fecha: <span id="fechaActual"></span></p>
+                                    <p>Hora: <span id="horaActual"></span></p>
+                                </div>
+                            </div>
+                        
+            
+                
+
+                            <hr>
+                            <div id="qrContainer">
+                                <h1>Escanea el siguiente código QR con WhatsApp</h1>
+                                <img id="qrCodeImage" src="<%= qrCode %>" alt="WhatsApp QR Code">
+                            </div>
+                            <div id="statusMessage" style="display: none;"></div>
+                             
+        
+
+                     
+
+
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h5 class="card-title">Estado..</h5> <!-- Título en la esquina superior izquierda -->
+                                    <div id="alertDiv" class="alert alert-info" role="alert">
+                                        En Espera...
+                                      </div>
+                                    
+                                </div>
+                                <div class="card-body d-flex">
+
+
+
+
+   <!-- Ficha 0 -->
+   <div id="plantidiv" class="card mr-3">
+    <div class="card-header">
+        <h5 class="card-title">Dir plantillas</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <input id="plantillabase" value="Dir plantillas">
+    <div class="card-body">
+        <div id="tree"></div>
+        
+        
+    </div>
+</div>
+
+
+
+                                    <!-- Ficha 1 -->
+                                    <div class="card mr-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title">Editor Plantilla</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body" style="background-color: #007bff;">
+                                            <div class="card-header">
+                                                <h5 class="card-title ">Integrar contenido de la Celda</h5> <!-- Título en la esquina superior izquierda -->
+                                          
+                                          
+                                            <button id="T1" class="btn btn-primary">A</button>
+                                            <button id="T2" class="btn btn-primary">B</button>
+                                            <button id="T3" class="btn btn-primary">C</button>
+                                            <button id="T4" class="btn btn-primary">D</button>
+                                            <button id="T5" class="btn btn-primary">E</button>
+                                            <button id="T6" class="btn btn-primary">F</button>
+                                            <button id="T7" class="btn btn-primary">G</button>
+                                            <button id="T8" class="btn btn-primary">H</button>
+                                            <button id="T9" class="btn btn-primary">I</button>
+                                            <button id="T10" class="btn btn-primary">J</button>
+                                            <button id="T11" class="btn btn-primary">K</button>
+                                            <button id="T12" class="btn btn-primary">L</button>
+                                            <button id="T13" class="btn btn-primary">M</button><br>
+                                            <button id="T14" class="btn btn-primary">N</button>
+                                            <button id="T15" class="btn btn-primary">O</button>
+                                            <button id="T16" class="btn btn-primary">P</button>
+                                            <button id="T17" class="btn btn-primary">Q</button>
+                                            <button id="T18" class="btn btn-primary">R</button>
+                                            <button id="T19" class="btn btn-primary">S</button>
+                                            <button id="T20" class="btn btn-primary">T</button>
+                                            <button id="T21" class="btn btn-primary">U</button>
+                                            <button id="T22" class="btn btn-primary">V</button>
+                                            <button id="T23" class="btn btn-primary">W</button>
+                                            <button id="T24" class="btn btn-primary">X</button>
+                                            <button id="T25" class="btn btn-primary">Y</button>
+                                            <button id="T26" class="btn btn-primary">Z</button>
+                                            <br>
+                                        </div>
+                                            <textarea id="inputTextarea" rows="4" cols="50" style="width: 600px; height: 300px;"></textarea>
+                                            <br>
+                                            <button id="reemplazarTexto" onclick="reemplazarTexto()" class="btn btn-primary">Guardar la plantilla</button>
+                                            
+
+<form id="formularioPlantilla">
+    <textarea id="outputTextarea" rows="4" cols="50"></textarea>
+    <button  id="guardarPlantilla" type="submit">Guardar Plantilla</button>
+</form>
+
+<button  id="test" type="submit"  class="btn btn-warning">TEST AUTO MENSAJE</button>
+<button id="guardarPlantillaBtn" type="submit" class="btn btn-success">Guardar Plantilla</button>
+<button  id="eliminarplantilla" type="submit"  class="btn btn-danger">Eliminar la plantilla</button>
+
+
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Ficha 2 -->
+                                    <div class="card mr-3">
+                                        <div class="card-header">
+                                            <h5 class="card-title">IMG Mensaje</h5> <!-- Título en la esquina superior izquierda -->
+                                        </div>
+                                        <div class="card-body">
+                                          
+                                            
+                                            <ul class="nav nav-tabs" id="customTab" role="tablist">
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link active" id="imagen1-tab" data-bs-toggle="tab" data-bs-target="#imagen1" type="button" role="tab" aria-controls="imagen1" aria-selected="true" onclick="cargarImagen('imagen/1.gif')">Imagen 1</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen2-tab" data-bs-toggle="tab" data-bs-target="#imagen2" type="button" role="tab" aria-controls="imagen2" aria-selected="false" onclick="cargarImagen('imagen/2.gif')">Imagen 2</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen3-tab" data-bs-toggle="tab" data-bs-target="#imagen3" type="button" role="tab" aria-controls="imagen3" aria-selected="false" onclick="cargarImagen('imagen/3.gif')">Imagen 3</button>
+                                                </li>
+                                                <li class="nav-item" role="presentation">
+                                                    <button class="nav-link" id="imagen4-tab" data-bs-toggle="tab" data-bs-target="#imagen4" type="button" role="tab" aria-controls="imagen4" aria-selected="false" onclick="cargarImagen($('#miInput').val())">IMG URL</button>
+                                                </li>
+                                            </ul>
+                                        
+                                            <!-- Contenido de las pestañas personalizadas -->
+                                            <div class="tab-content" id="customTabContent">
+                                                <!-- Pestaña 1: Imagen 1 -->
+                                                <div class="tab-pane fade show active" id="imagen1" role="tabpanel" aria-labelledby="imagen1-tab">
+                                                    <img id="imagenA" src="imagen/1.gif" alt="Descripción de la imagen 1" style="width: 380px; height: 286px;">
+                                                </div>
+                                        
+                                                <!-- Pestaña 2: Imagen 2 -->
+                                                <div class="tab-pane fade" id="imagen2" role="tabpanel" aria-labelledby="imagen2-tab">
+                                                    <img id="imagenB" src="imagen/2.gif" alt="Descripción de la imagen 2" style="width: 380px; height: 286px;">
+                                                </div>
+                                        
+                                                <!-- Pestaña 3: Imagen 3 -->
+                                                <div class="tab-pane fade" id="imagen3" role="tabpanel" aria-labelledby="imagen3-tab">
+                                                    <img id="imagenC" src="imagen/3.gif" alt="Descripción de la imagen 3" style="width: 380px; height: 286px;">
+                                                </div>
+                                                 <!-- Pestaña 4: Imagen 4-->
+                                                 <div class="tab-pane fade" id="imagen4" role="tabpanel" aria-labelledby="imagen4-tab">
+                                                    IMG CON URL
+                                                    <br><BR>
+                                                    <input type="checkbox" id="miCheckbox" name="miCheckbox" value="valor" >
+                                                      <input type="text" id="miInput" name="miInput" placeholder="INTRODUCE URL DE IMG" oninput="actualizarImagen(this.value)">
+
+                                                          </div>
+                                            </div>
+                                        </div>
+                                    
+                                        
+
+                                    </div>
+                                    
+                              
+
+
+
+
+                                </div>
+                            </div>
+                            
+                            <!-- Campo de entrada para la URL de la imagen -->
+                   
+                            
+                            <script>
+                                // Función para cargar la imagen correspondiente al hacer clic en la pestaña
+                                function cargarImagen(url) {
+                                    document.getElementById('imagena').value = url;
+                                }
+                            </script>
+                            
+
+                            
+
+
+                            
+                        </div>
+                    </div>
+                    <!-- Pestaña 2: Configuración -->
+              <!-- Pestaña 2: Configuración -->
+              <div class="tab-pane fade" id="configuracion" role="tabpanel" aria-labelledby="configuracion-tab">
+                <div class="panel-section">
+                    <h2 class="panel-title">CONFIGURACION</h2>
+            
+                    <!-- Ficha 3 -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Upload</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <label for="file1" class="form-label">(EXCEL)</label>
+            <input type="file" class="form-control-file" id="file1" name="file1" accept=".xlsx" required>
+            <button id="uploadButton" class="btn btn-primary">Subir XLSX</button> <!-- Botón para subir el archivo -->
+        </div>
+       
+      <!-- Archivo 2 -->
+<div class="mb-3">
+    <label for="file2" class="form-label">(GIF 1):</label>
+    <input type="file" class="form-control-file" id="file2" name="file2" accept=".gif" required>
+    <button id="uploadButton2" class="btn btn-primary">Subir GIF 1</button> <!-- Botón para subir el archivo 2 -->
+</div>
+
+
+     <!-- Archivo 3 -->
+<div class="mb-3">
+    <label for="file3" class="form-label">(GIF 2):</label>
+    <input type="file" class="form-control-file" id="file3" name="file3" accept=".gif" required>
+    <button id="uploadButton3" class="btn btn-primary">Subir GIF 2</button> <!-- Botón para subir el archivo 3 -->
+</div>
+
+
+      <!-- Archivo 4 -->
+<div class="mb-3">
+    <label for="file4" class="form-label">(GIF 3):</label>
+    <input type="file" class="form-control-file" id="file4" name="file4" accept=".gif" required>
+    <button id="uploadButton4" class="btn btn-primary">Subir GIF 3</button> <!-- Botón para subir el archivo 4 -->
+</div>
+
+
+    </div>
+</div>
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">Server</h5> <!-- Título en la esquina superior izquierda -->
+    </div>
+    <div class="card-body">
+    
+        <button id="restartServerButton" class="btn btn-danger">Reiniciar Servidor</button>
+        <br><hr>
+        <form id="updateNumberForm">
+         <label for="newNumber">NUMERO QUE RECIBE MENSAJE DE CONEXION:</label><br>
+         <input type="text" id="newNumber" name="newNumber" required><br><br>
+         <button type="submit" class="btn btn-danger">Actualizar número</button>
+     </form>
+     <br><hr>
+     <label for="newNumber">LETRA DE COLUMNA DONDE SE ENCUENTRA EL TELEFONO DEL USER (EN LA LISTA):</label><br>
+     <input type="hidden" class="form-control" id="FILA" name="FILA" value="<%= FILAN %>" required>
+
+     <input type="text" class="form-control" id="FILAN" name="FILAN" value="<%= FILA %>" required><br>
+     <button id="guardarfila" class="btn btn-danger">Guardar</button>
+    </div>
+</div>
+
+                </div>
+            </div>
+            
+              <!-- Pestaña 2: Configuración -->
+              <div class="tab-pane fade" id="configuracion1" role="tabpanel" aria-labelledby="configuracion-tab">
+                <div class="panel-section">
+                    <h2 class="panel-title">MENSAJE INDIVIDUAL</h2>
+
+
+
+                    <form id="enviarMensajeForm">
+
+
+                        <div class="d-flex">
+                            <!-- Ficha 1 -->
+                            <div class="card mb-3 d-inline-block">
+                                <div class="card-header">
+                                    <h5 class="card-title">Celdas del Excel</h5> <!-- Título en la esquina superior izquierda -->
+                                </div>
+                                <div class="card-body" style="overflow-y: scroll; max-height: 800px;">
+                             
+                                    <div class="mb-3"><label for="A" class="form-label">CELDA A:</label><input type="text" class="form-control" id="A" name="A" required></div>
+                                    <div class="mb-3"><label for="B" class="form-label">CELDA B:</label><input type="text" class="form-control" id="B" name="B" required></div>
+                                    <div class="mb-3"><label for="C" class="form-label">CELDA C:</label><input type="text" class="form-control" id="C" name="C" required></div>
+                                    <div class="mb-3"><label for="D" class="form-label">CELDA D:</label><input type="text" class="form-control" id="D" name="D" required></div>
+                                    <div class="mb-3"><label for="E" class="form-label">CELDA E:</label><input type="text" class="form-control" id="E" name="E" required></div>
+                                    <div class="mb-3"><label for="F" class="form-label">CELDA F:</label><input type="text" class="form-control" id="F" name="F" required></div>
+                                    <div class="mb-3"><label for="G" class="form-label">CELDA G:</label><input type="text" class="form-control" id="G" name="G" required></div>
+                                    <div class="mb-3"><label for="H" class="form-label">CELDA H:</label><input type="text" class="form-control" id="H" name="H" required></div>
+                                    <div class="mb-3"><label for="I" class="form-label">CELDA I:</label><input type="text" class="form-control" id="I" name="I" required></div>
+                                    <div class="mb-3"><label for="J" class="form-label">CELDA J:</label><input type="text" class="form-control" id="J" name="J" required></div>
+                                    <div class="mb-3"><label for="K" class="form-label">CELDA K:</label><input type="text" class="form-control" id="K" name="K" required></div>
+                                    <div class="mb-3"><label for="L" class="form-label">CELDA L:</label><input type="text" class="form-control" id="L" name="L" required></div>
+                                    <div class="mb-3"><label for="M" class="form-label">CELDA M:</label><input type="text" class="form-control" id="M" name="M" required></div>
+                                    <div class="mb-3"><label for="N" class="form-label">CELDA N:</label><input type="text" class="form-control" id="N" name="N" required></div>
+                                    <div class="mb-3"><label for="O" class="form-label">CELDA O:</label><input type="text" class="form-control" id="O" name="O" required></div>
+                                    <div class="mb-3"><label for="P" class="form-label">CELDA P:</label><input type="text" class="form-control" id="P" name="P" required></div>
+                                    <div class="mb-3"><label for="Q" class="form-label">CELDA Q:</label><input type="text" class="form-control" id="Q" name="Q" required></div>
+                                    <div class="mb-3"><label for="R" class="form-label">CELDA R:</label><input type="text" class="form-control" id="R" name="R" required></div>
+                                    <div class="mb-3"><label for="S" class="form-label">CELDA S:</label><input type="text" class="form-control" id="S" name="S" required></div>
+                                    <div class="mb-3"><label for="T" class="form-label">CELDA T:</label><input type="text" class="form-control" id="T" name="T" required></div>
+                                    <div class="mb-3"><label for="U" class="form-label">CELDA U:</label><input type="text" class="form-control" id="U" name="U" required></div>
+                                    <div class="mb-3"><label for="V" class="form-label">CELDA V:</label><input type="text" class="form-control" id="V" name="V" required></div>
+                                    <div class="mb-3"><label for="W" class="form-label">CELDA W:</label><input type="text" class="form-control" id="W" name="W" required></div>
+                                    <div class="mb-3"><label for="X" class="form-label">CELDA X:</label><input type="text" class="form-control" id="X" name="X" required></div>
+                                    <div class="mb-3"><label for="Y" class="form-label">CELDA Y:</label><input type="text" class="form-control" id="Y" name="Y" required></div>
+                                    <div class="mb-3"><label for="Z" class="form-label">CELDA Z:</label><input type="text" class="form-control" id="Z" name="Z" required></div>
+                                </div>
+                            </div>
+                          
+                            <!-- Ficha 2 -->
+                            <div class="card mb-3 d-inline-block flex-grow-1">
+                                <div class="card-header">
+                                    <h5 class="card-title">Mensaje</h5> <!-- Título en la esquina superior izquierda -->
+                                </div>
+                                <div class="card-body">
+                                    <div class="mb-3">
+                                        <label for="imagena" class="form-label">Imagen:</label>
+                                        <input type="text" class="form-control" id="imagena" name="imagena" value="imagen/1.gif" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="pais" class="form-label">País +:</label>
+                                        <input type="text" class="form-control" id="pais" name="pais" value="549" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="cod" class="form-label">Característica:</label>
+                                        <input type="text" class="form-control" id="cod" name="cod" value="351" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="numero" class="form-label">Número ( TELEFONO DESTINO ):</label>
+                                     
+                                        <input type="text" class="form-control" id="numero" name="numero" required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="mensaje" class="form-label">Mensaje:</label>
+                                        <textarea class="form-control" id="mensaje" name="mensaje" style="height: 300px;" required></textarea>
+
+
+                                    </div>
+                                    <!-- Botón de enviar -->
+                                    <button type="button" id="enviarmensaje" class="btn btn-primary" onclick="enviarMensaje()">Enviar Mensaje</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+
+                    </form>
+
+
+
+
+                </div>
+            </div>
+
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="alertContainer"></div>
+
+
+    <!-- Agregamos Bootstrap JS y Popper.js -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Biblioteca jQuery (requerida para AJAX) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+
+
+   <!--/////////////////////////////////////////////////////////////////////////////////////////////////////-->
+
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+
+    <script>
+
+
+
+
+
+const socket = io();
+var FILA = $('#FILA').val();
+socket.on('connect', () => {
+    socket.emit('requestStatus');
+});
+
+// Escucha la respuesta del servidor
+socket.on('statusResponse', (estado) => {
+   // console.log(estado);
+    if (estado === 1) {
+        $('#estadoqr').html('PUSHISAP CONECTADO ').removeClass('text-danger blink').addClass('text-success');
+        $("#qrContainer").hide();
+    } else {
+        // Puedes manejar el otro estado aquí si es necesario
+        $('#estadoqr').html('PUSHISAP DESCONECTADO').removeClass('text-success').addClass('text-danger').addClass('blink');
+        // Puedes decidir mostrar el contenedor nuevamente si es necesario
+        $("#qrContainer").show();
+    }
+});
+
+socket.on('disconnect', () => {
+    $('#estadoqr').html('PUSHISAP DESCONECTADO').removeClass('text-success').addClass('text-danger').addClass('blink');
+});
+
+// Escuchar el evento 'qrCodeUpdated'
+socket.on('qrCodeUpdated', (newQrCode) => {
+    // Actualizar dinámicamente la imagen del código QR
+    const qrCodeImage = document.getElementById('qrCodeImage');
+    qrCodeImage.src = newQrCode;
+});
+
+// Escuchar el evento 'authenticated'
+socket.on('authenticated', (estado) => {
+    if (estado === 1) {
+        $('#estadoqr').html('PUSHISAP CONECTADO').removeClass('blink').addClass('text-success');
+        $('#estadoqr').html('PUSHISAP CONECTADO').removeClass('text-danger').addClass('text-success');
+
+        $("#qrContainer").hide();
+    } else {
+        // Puedes manejar el otro estado aquí si es necesario
+        $('#estadoqr').html('PUSHISAP DESCONECTADO').removeClass('text-success').addClass('text-danger').addClass('blink');
+        // Puedes decidir mostrar el contenedor nuevamente si es necesario
+        $("#qrContainer").show();
+    }
+});
+
+
+
+         var contador = 0; 
+        // Función para enviar mensajes mediante AJAX
+        function enviarMensaje() {
+    contador++;
+    $("#contador").text(contador);
+    
+    // Verificar si el checkbox está marcado
+    const checkboxMarcado = $('#miCheckbox').prop('checked');
+
+    // Obtener el valor del input de texto si el checkbox está marcado
+    let imagena = '';
+    if (checkboxMarcado) {
+        imagena = $('#miInput').val();
+    } else {
+        // Obtener el valor de imagena como lo hacías antes si el checkbox no está marcado
+        imagena =  $('#imagena').val();
+    }
+
+    // Obtener los otros valores del formulario
+    const pais = $('#pais').val();
+    const cod = $('#cod').val();
+    const numero = $('#numero').val();
+    const mensaje = $('#mensaje').val();
+
+    // Realizar la solicitud AJAX para enviar el mensaje
+    $.ajax({
+        url: '/enviar-mensaje', // Ruta del servidor para manejar la solicitud
+        method: 'POST',
+        data: { imagena: imagena, pais: pais, cod: cod, numero: numero, mensaje: mensaje },
+        success: function(response) {
+            // Incrementar el contador y actualizar el elemento HTML
+         //   console.log(response);
+         $("#alertDiv").removeClass().addClass("alert alert-info").html('Mensaje enviado !!');
+            $("#erro8").html(response);
+        },
+        error: function(error) {
+            // Manejar errores si es necesario
+            $("#estado").text('ERROR AL ENVIAR MENSAJES');
+        }
+    });
+}
+
+
+    $("#stopButton").click(function() {
+        contador = 0;
+        $("#contador").text(contador);
+    });
+
+        // Función para subir una imagen mediante AJAX
+        function subirImagen() {
+            // Obtener el archivo de imagen seleccionado
+            const formData = new FormData();
+            formData.append('imagen', $('#imagen')[0].files[0]);
+
+            // Realizar la solicitud AJAX para subir la imagen
+            $.ajax({
+                url: '/subir-imagen', // Ruta del servidor para manejar la solicitud de subida de imagen
+                method: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function(response) {
+                    // Manejar la respuesta del servidor si es necesario
+                  //  console.log(response);
+                },
+                error: function(error) {
+                    // Manejar errores si es necesario
+                    console.error(error);
+                }
+            });
+        }
+
+
+    
+     // Función para cargar el número al hacer clic en un ítem de la lista
+     $(document).ready(function() {
+       
+
+        $("#numeros-list li").click(function() {
+            var numero = $(this).text();
+            $("#numero").val(numero);
+        });
+    });
+
+
+    </script>
+
+    <script>
+$(document).ready(function() {
+    $("#estado").text("Detenido esperando acción").addClass("blink");
+    var listaItems = $("#numeros-list li");
+    var currentIndex = 0;
+    var timer; // Variable para el temporizador principal
+    var contadorTimer; // Variable para el temporizador del contador
+
+    // Función para mostrar el tiempo restante en el div contadordeenvio
+    function mostrarTiempoRestante(segundos) {
+        var contadorDeEnvio = $("#contadordeenvio");
+        contadorDeEnvio.text("Proximo mensaje en: " +  segundos);
+        contadorTimer = setInterval(function() {
+            segundos--;
+            if (segundos <= 0) {
+                clearInterval(contadorTimer);
+                contadorDeEnvio.text("");
+            } else {
+                contadorDeEnvio.text("Proximo mensaje en: " + segundos);
+            }
+        }, 1000);
+    }
+
+
+    // Función para limpiar el estado de la lista
+    function limpiarLista() {
+        listaItems.css("background-color", ""); // Eliminar el fondo verde de los ítems
+        currentIndex = 0; // Restablecer el índice
+    }
+
+    // Función para simular clic en el botón de enviar mensaje
+    function enviarMensaje() {
+        $("#enviarMensajeForm button").click();
+    }
+});
+
+
+
+
+
+
+ // Manejar el evento de clic en los botones de opción solo si no están deshabilitados
+$(".btn-group-toggle label").click(function() {
+    if (!$(this).find("input[type='radio']").prop("disabled")) {
+        // Eliminar la clase 'active' de todos los botones de opción
+        $(".btn-group-toggle label").removeClass("active");
+
+        // Agregar la clase 'active' solo al botón de opción seleccionado
+        $(this).addClass("active");
+    }
+});
+
+$(document).ready(function() {
+        // Función para cargar el número al hacer clic en una fila de la tabla
+        $("#numeros-list1 tbody tr").click(function() {
+            // Obtener el número de la columna I de la fila clicada
+            var numero = $(this).find("td:eq("+ FILA +")").text();
+            // Colocar el número en el input correspondiente
+            $("#numero").val(numero);
+        });
+    });
+</script>
+
+
+<script>
+    //////////////////////////////////////////////////////////////////////////////////////////////
+    $(document).ready(function() {
+    var currentIndex = 0; // Índice para seguir la fila actual
+    var timer; // Variable para el temporizador
+    var itemHeight = 36; // Altura de cada fila en la tabla (aproximada)
+    var isTimerRunning = true; // Variable para controlar si el temporizador está en ejecución o detenido
+    var tiempoRestante = 0; // Variable para almacenar el tiempo restante antes del próximo envío
+
+// Función para hacer clic automáticamente en las filas cada 5 segundos
+function autoClick() {
+    // Obtener todas las filas de la tabla
+    var rows = $("#numeros-list1 tbody tr");
+    // Si todavía hay filas por recorrer
+    if (currentIndex < rows.length) {
+        // Remover el color de fondo de la fila anterior
+        $("#numeros-list1 tbody tr").removeClass("selected");
+        // Obtener la fila actual
+        var currentRow = $(rows[currentIndex]);
+        // Hacer clic en la fila actual y obtener el número de la columna I
+        var numero = $(this).find("td:eq("+ FILA +")").text();
+        $("#numero").val(numero);
+        // Mostrar el contenido de las celdas correspondientes en los inputs
+        $("#A").val(currentRow.find("td:eq(1)").text());
+$("#B").val(currentRow.find("td:eq(2)").text());
+$("#C").val(currentRow.find("td:eq(3)").text());
+$("#D").val(currentRow.find("td:eq(4)").text());
+$("#E").val(currentRow.find("td:eq(5)").text());
+$("#F").val(currentRow.find("td:eq(6)").text());
+$("#G").val(currentRow.find("td:eq(7)").text());
+$("#H").val(currentRow.find("td:eq(8)").text());
+$("#I").val(currentRow.find("td:eq(9)").text());
+$("#J").val(currentRow.find("td:eq(10)").text());
+$("#K").val(currentRow.find("td:eq(11)").text());
+$("#L").val(currentRow.find("td:eq(12)").text());
+$("#M").val(currentRow.find("td:eq(13)").text());
+$("#N").val(currentRow.find("td:eq(14)").text());
+$("#O").val(currentRow.find("td:eq(15)").text());
+$("#P").val(currentRow.find("td:eq(16)").text());
+$("#Q").val(currentRow.find("td:eq(17)").text());
+$("#R").val(currentRow.find("td:eq(18)").text());
+$("#S").val(currentRow.find("td:eq(19)").text());
+$("#T").val(currentRow.find("td:eq(20)").text());
+$("#U").val(currentRow.find("td:eq(21)").text());
+$("#V").val(currentRow.find("td:eq(22)").text());
+$("#W").val(currentRow.find("td:eq(23)").text());
+$("#X").val(currentRow.find("td:eq(24)").text());
+$("#Y").val(currentRow.find("td:eq(25)").text());
+$("#Z").val(currentRow.find("td:eq(26)").text());
+
+        // Leer el contenido del archivo plantilla.txt
+      //  $.get("/obtenerPlantilla", function(plantilla) {
+        var nombreArchivo = $('#plantillabase').val();
+        $.get("/obtenerPlantilla/" + nombreArchivo, function(plantilla) {
+       
+            // Realizar la sustitución dinámica en la plantilla
+            plantilla = plantilla.replace(/\$\('\#A'\)\.val\(\)/g, currentRow.find("td:eq(1)").text());
+plantilla = plantilla.replace(/\$\('\#B'\)\.val\(\)/g, currentRow.find("td:eq(2)").text());
+plantilla = plantilla.replace(/\$\('\#C'\)\.val\(\)/g, currentRow.find("td:eq(3)").text());
+plantilla = plantilla.replace(/\$\('\#D'\)\.val\(\)/g, currentRow.find("td:eq(4)").text());
+plantilla = plantilla.replace(/\$\('\#E'\)\.val\(\)/g, currentRow.find("td:eq(5)").text());
+plantilla = plantilla.replace(/\$\('\#F'\)\.val\(\)/g, currentRow.find("td:eq(6)").text());
+plantilla = plantilla.replace(/\$\('\#G'\)\.val\(\)/g, currentRow.find("td:eq(7)").text());
+plantilla = plantilla.replace(/\$\('\#H'\)\.val\(\)/g, currentRow.find("td:eq(8)").text());
+plantilla = plantilla.replace(/\$\('\#I'\)\.val\(\)/g, currentRow.find("td:eq(9)").text());
+plantilla = plantilla.replace(/\$\('\#J'\)\.val\(\)/g, currentRow.find("td:eq(10)").text());
+plantilla = plantilla.replace(/\$\('\#K'\)\.val\(\)/g, currentRow.find("td:eq(11)").text());
+plantilla = plantilla.replace(/\$\('\#L'\)\.val\(\)/g, currentRow.find("td:eq(12)").text());
+plantilla = plantilla.replace(/\$\('\#M'\)\.val\(\)/g, currentRow.find("td:eq(13)").text());
+plantilla = plantilla.replace(/\$\('\#N'\)\.val\(\)/g, currentRow.find("td:eq(14)").text());
+plantilla = plantilla.replace(/\$\('\#O'\)\.val\(\)/g, currentRow.find("td:eq(15)").text());
+plantilla = plantilla.replace(/\$\('\#P'\)\.val\(\)/g, currentRow.find("td:eq(16)").text());
+plantilla = plantilla.replace(/\$\('\#Q'\)\.val\(\)/g, currentRow.find("td:eq(17)").text());
+plantilla = plantilla.replace(/\$\('\#R'\)\.val\(\)/g, currentRow.find("td:eq(18)").text());
+plantilla = plantilla.replace(/\$\('\#S'\)\.val\(\)/g, currentRow.find("td:eq(19)").text());
+plantilla = plantilla.replace(/\$\('\#T'\)\.val\(\)/g, currentRow.find("td:eq(20)").text());
+plantilla = plantilla.replace(/\$\('\#U'\)\.val\(\)/g, currentRow.find("td:eq(21)").text());
+plantilla = plantilla.replace(/\$\('\#V'\)\.val\(\)/g, currentRow.find("td:eq(22)").text());
+plantilla = plantilla.replace(/\$\('\#W'\)\.val\(\)/g, currentRow.find("td:eq(23)").text());
+plantilla = plantilla.replace(/\$\('\#X'\)\.val\(\)/g, currentRow.find("td:eq(24)").text());
+plantilla = plantilla.replace(/\$\('\#Y'\)\.val\(\)/g, currentRow.find("td:eq(25)").text());
+plantilla = plantilla.replace(/\$\('\#Z'\)\.val\(\)/g, currentRow.find("td:eq(26)").text());
+
+            // Actualizar el contenido de la plantilla con el contenido del archivo
+            $("#mensaje").val(plantilla);
+
+            // Hacer clic en la fila
+            currentRow.addClass("selected").click();
+            // Incrementar el índice para la próxima fila
+            currentIndex++;
+            // Calcular la posición del item seleccionado
+            var selectedPosition = currentIndex * itemHeight;
+            // Calcular la posición del scroll
+            var scrollPosition = Math.max(0, selectedPosition - $("#listaturnos").height() + itemHeight);
+            // Mover el scroll a la posición calculada
+            $("#listaturnos").scrollTop(scrollPosition);
+        });
+    }
+
+    // Mostrar cuadro de diálogo al final de la lista
+    if (currentIndex >= rows.length) {
+        $("#stopButton").click();
+      
+
+      //  $("#enviarMensajeForm")[0].reset();
+  
+        currentIndex = 0;
+   
+    // Ejemplo de uso
+  //  document.getElementById("imagen3-tab").click();
+var pestañaSeleccionada = determinarPestanaSeleccionada();
+if (pestañaSeleccionada !== null) {
+  // alert("La pestaña seleccionada es: " + pestañaSeleccionada);
+   if (pestañaSeleccionada === "imagen1-tab") {
+        document.getElementById("imagen1-tab").click();
+    } else if (pestañaSeleccionada === "imagen2-tab") {
+        document.getElementById("imagen2-tab").click();
+    } else if (pestañaSeleccionada === "imagen3-tab") {
+        document.getElementById("imagen3-tab").click();
+    } else {
+      //  console.log("Ninguna pestaña está seleccionada o el ID de la pestaña seleccionada es desconocido.");
+    }
+
+    $("#mensaje").val('');
+   
+  //  alert('SE LLEGO AL FINAL DE LA LISTA  !!!');
+ // toastr.info('SE LLEGO AL FINAL DE LA LISTA  !!!', 'Información', { closeButton: true });
+ $("#alertDiv").removeClass().addClass("alert alert-success").html('SE LLEGO AL FINAL DE LA LISTA  !!!');
+
+  
+
+
+} else {
+ // alert("Ninguna pestaña está seleccionada.");
+}
+
+
+
+    }
+}
+
+
+
+
+
+
+
+
+function determinarPestanaSeleccionada() {
+    var pestañas = ["imagen1-tab", "imagen2-tab", "imagen3-tab"];
+    var pestañaSeleccionada = null;
+
+    // Iterar sobre las pestañas para encontrar la seleccionada
+    pestañas.forEach(function(pestaña) {
+        var elemento = document.getElementById(pestaña);
+        if (elemento.classList.contains("active")) {
+            pestañaSeleccionada = pestaña;
+        }
+    });
+
+    // Devolver el ID de la pestaña seleccionada
+    return pestañaSeleccionada;
+}
+
+
+
+// Llama a la función para mostrar el alerta al ejecutar ALERTBOSS()
+
+
+
+
+function startAutoClick() {
+    // Detener el temporizador actual, si existe
+    clearInterval(timer);
+    // Obtener el valor del tiempo de envío seleccionado
+    var tiempoEnvio = parseInt($("#tiempoEnvio").val());
+    tiempoRestante = tiempoEnvio; // Establecer el tiempo restante inicial
+    
+    // Iniciar un nuevo temporizador para ejecutar la función autoClick() cada ciertos segundos
+    timer = setInterval(function() {
+        // Reducir el tiempo restante en cada iteración
+        actualizarContador(); // Actualizar el contador de tiempo restante
+   // Si el tiempo restante llega a cero, enviar el mensaje, llamar a autoClick() y restablecer el tiempo restante
+        if (tiempoRestante === 0) {
+          //  $("#contadordeenvio").text(0);
+           // Verificar si #option2 está marcado y simular clic
+           if ($("#option2").is(":checked")) {
+               // Generar un número aleatorio entre 1 y 10
+    var tiempoAleatorio = Math.floor(Math.random() * 15) + 1;
+    
+    // Asignar el valor aleatorio a la variable tiempoEnvio
+    var tiempoEnvio = tiempoAleatorio;
+            } else {
+                // Asignar el valor actual de #tiempoEnvio a tiempoEnvio si #option2 no está marcado
+                tiempoEnvio = parseInt($("#tiempoEnvio").val());
+            }
+            enviarMensaje(); // Envío de mensaje dentro del temporizador
+            autoClick();
+            tiempoRestante = tiempoEnvio; // Restablecer el tiempo restante al valor seleccionado
+        }
+    }, 1000); // Temporizador para ejecutar cada segundo
+}
+
+
+    // Función para actualizar el contador de tiempo restante
+    function actualizarContador() {
+        $("#contadordeenvio").text(tiempoRestante -1);
+     
+        if (tiempoRestante > 0) {
+         
+            tiempoRestante--;
+        }
+    }
+
+
+// Evento de clic para iniciar el recorrido automático al presionar el botón con id "startButton"
+$("#startButton").click(function() {
+    clearInterval(timer); // Detener el temporizador si estaba en ejecución
+    startAutoClick(); // Iniciar el recorrido automático
+    isTimerRunning = true; // Actualizar el estado del temporizador
+  
+    $("#estado").text("Enviando mensajes!").removeClass("text-warning").addClass("text-white blink");
+    $("#contador").removeClass("text-danger blink").addClass("text-white");
+    $(".btn-group-toggle input").prop("disabled", true);
+    
+    // Hacer parpadear solo el botón de inicio
+    $("#startButton").addClass("blink");
+    $("#stopButton, #pauseButton").removeClass("blink");
+});
+
+// Evento de clic para detener el temporizador al presionar el botón con id "stopButton"
+$("#stopButton").click(function() {
+    $("#mensaje").val('');
+    clearInterval(timer); // Detener el temporizador
+    isTimerRunning = false; // Actualizar el estado del temporizador
+    currentIndex = 0; // Restaurar el índice de la fila a cero
+    $("#numeros-list1 tbody tr").removeClass("selected"); // Deseleccionar la fila
+ 
+
+    $("#contadordeenvio").text("Detenido");
+    $("#estado").text("Detenido esperando acción..").removeClass("text-warning").addClass("text-white").addClass("blink");
+    $("#contador").removeClass("text-white").removeClass("text-warning blink").addClass("text-danger");
+    $(".btn-group-toggle input").prop("disabled", false);
+    
+    // Hacer parpadear solo el botón de detención
+    $("#stopButton").addClass("blink");
+    $("#startButton, #pauseButton").removeClass("blink");
+});
+
+// Evento de clic para pausar el temporizador al presionar el botón con id "pauseButton"
+$("#pauseButton").click(function() {
+    clearInterval(timer); // Detener el temporizador
+    isTimerRunning = false; // Actualizar el estado del temporizador
+    $("#contadordeenvio").text("Reanuda con (PLAY)");
+    $("#estado").text("En pausa..").removeClass("text-white").addClass("text-warning blink");
+    $("#contador").removeClass("text-danger").removeClass("text-white").addClass("text-warning blink");
+    
+    // Hacer parpadear solo el botón de pausa
+    $("#pauseButton").addClass("blink");
+    $("#startButton, #stopButton").removeClass("blink");
+});
+
+
+    // Función para cargar el número al hacer clic en una fila de la tabla
+    $("#numeros-list1 tbody tr").click(function() {
+        // Obtener el número de la columna I de la fila clicada
+        var numero = $(this).find("td:eq("+ FILA +")").text();
+        // Colocar el número en el input correspondiente
+        $("#numero").val(numero);
+    });
+});
+
+
+
+    ///////////////////////////////////////////////////////////////////////////////////////////
+
+
+
+</script>
+<script>
+    // Evento de clic para cambiar el tiempo de envío a 5 segundos
+  // Evento de clic para cambiar el tiempo de envío a 5 segundos
+$("#option1").click(function() {
+    $("#tiempoEnvio").val(5); // Establecer el tiempo de envío a 5 segundos
+    tiempoRestante = 5; // Establecer el tiempo restante al valor seleccionado
+
+    // Hacer parpadear solo el botón seleccionado
+    $(this).parent().addClass("blink");
+    // Detener el parpadeo de los otros botones
+    $("#option2, #option3").parent().removeClass("blink");
+});
+
+// Evento de clic para cambiar el tiempo de envío a 10 segundos
+$("#option2").click(function() {
+    // Generar un número aleatorio entre 1 y 10
+    var numeroAleatorio = Math.floor(Math.random() * 10) + 1;
+
+    $("#tiempoEnvio").val(numeroAleatorio); // Establecer el tiempo de envío al número aleatorio
+    tiempoRestante = numeroAleatorio; // Establecer el tiempo restante al valor seleccionado
+
+    // Hacer parpadear solo el botón seleccionado
+    $(this).parent().addClass("blink");
+    // Detener el parpadeo de los otros botones
+    $("#option1, #option3").parent().removeClass("blink");
+});
+// Evento de clic para cambiar el tiempo de envío a 60 segundos (1 minuto)
+$("#option3").click(function() {
+    $("#tiempoEnvio").val(1); // Establecer el tiempo de envío a 60 segundos (1 minuto)
+    tiempoRestante = 1; // Establecer el tiempo restante al valor seleccionado
+
+    // Hacer parpadear solo el botón seleccionado
+    $(this).parent().addClass("blink");
+    // Detener el parpadeo de los otros botones
+    $("#option1, #option2").parent().removeClass("blink");
+});
+
+function reemplazarTexto() {
+    // Obtener el texto ingresado por el usuario
+    var textoOriginal = document.getElementById("inputTextarea").value;
+
+    // Realizar los reemplazos según las reglas especificadas
+    var textoModificado = textoOriginal.replace(/\(A\)/g, "$('#A').val()");
+textoModificado = textoModificado.replace(/\(B\)/g, "$('#B').val()");
+textoModificado = textoModificado.replace(/\(C\)/g, "$('#C').val()");
+textoModificado = textoModificado.replace(/\(D\)/g, "$('#D').val()");
+textoModificado = textoModificado.replace(/\(E\)/g, "$('#E').val()");
+textoModificado = textoModificado.replace(/\(F\)/g, "$('#F').val()");
+textoModificado = textoModificado.replace(/\(G\)/g, "$('#G').val()");
+textoModificado = textoModificado.replace(/\(H\)/g, "$('#H').val()");
+textoModificado = textoModificado.replace(/\(I\)/g, "$('#I').val()");
+textoModificado = textoModificado.replace(/\(J\)/g, "$('#J').val()");
+textoModificado = textoModificado.replace(/\(K\)/g, "$('#K').val()");
+textoModificado = textoModificado.replace(/\(L\)/g, "$('#L').val()");
+textoModificado = textoModificado.replace(/\(M\)/g, "$('#M').val()");
+textoModificado = textoModificado.replace(/\(N\)/g, "$('#N').val()");
+textoModificado = textoModificado.replace(/\(O\)/g, "$('#O').val()");
+textoModificado = textoModificado.replace(/\(P\)/g, "$('#P').val()");
+textoModificado = textoModificado.replace(/\(Q\)/g, "$('#Q').val()");
+textoModificado = textoModificado.replace(/\(R\)/g, "$('#R').val()");
+textoModificado = textoModificado.replace(/\(S\)/g, "$('#S').val()");
+textoModificado = textoModificado.replace(/\(T\)/g, "$('#T').val()");
+textoModificado = textoModificado.replace(/\(U\)/g, "$('#U').val()");
+textoModificado = textoModificado.replace(/\(V\)/g, "$('#V').val()");
+textoModificado = textoModificado.replace(/\(W\)/g, "$('#W').val()");
+textoModificado = textoModificado.replace(/\(X\)/g, "$('#X').val()");
+textoModificado = textoModificado.replace(/\(Y\)/g, "$('#Y').val()");
+textoModificado = textoModificado.replace(/\(Z\)/g, "$('#Z').val()");
+
+    // Mostrar el resultado en el segundo textarea
+    document.getElementById("outputTextarea").value = textoModificado;
+    
+    // Enviar los datos al servidor utilizando AJAX
+    var xhr = new XMLHttpRequest();
+    xhr.open('POST', '/guardarPlantilla', true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState === XMLHttpRequest.DONE) {
+            if (xhr.status === 200) {
+              //  console.log('Plantilla guardada correctamente');
+             //   alert('Plantilla guardada correctamente !!');
+             $("#eliminarplantilla").css("display", "inline-block");
+             $("#alertDiv").removeClass().addClass("alert alert-info").html('Plantilla guardada correctamente !!');
+            } else {
+                console.error('Error al guardar la plantilla:', xhr.responseText);
+            }
+        }
+    };
+    xhr.send(JSON.stringify({ contenido: textoModificado }));
+}
+
+
+
+</script>
+
+
+
+
+<script>
+    // Manejador de eventos para el envío del formulario
+    document.getElementById('formularioPlantilla').addEventListener('submit', function(event) {
+        event.preventDefault(); // Evitar el envío del formulario por defecto
+
+        // Obtener el contenido del textarea
+        var contenido = document.getElementById('outputTextarea').value;
+
+        // Enviar los datos al servidor utilizando AJAX
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', '/guardarPlantilla', true);
+        xhr.setRequestHeader('Content-Type', 'application/json');
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                 //   console.log('Plantilla guardada correctamente');
+                
+                 $(".eliminarplantilla").css("display", "inline-block");
+                    $("#alertDiv").removeClass().addClass("alert alert-info").html('Plantilla guardada correctamente !!');
+                } else {
+                    console.error('Error al guardar la plantilla:', xhr.responseText);
+                }
+            }
+        };
+        xhr.send(JSON.stringify({ contenido: contenido }));
+    });
+</script>
+
+
+
+
+<script>
+    // Event listener para el botón T1
+    document.getElementById('T1').addEventListener('click', function() {
+    agregarTexto('(A)');
+});
+
+document.getElementById('T2').addEventListener('click', function() {
+    agregarTexto('(B)');
+});
+
+document.getElementById('T3').addEventListener('click', function() {
+    agregarTexto('(C)');
+});
+
+document.getElementById('T4').addEventListener('click', function() {
+    agregarTexto('(D)');
+});
+
+document.getElementById('T5').addEventListener('click', function() {
+    agregarTexto('(E)');
+});
+
+document.getElementById('T6').addEventListener('click', function() {
+    agregarTexto('(F)');
+});
+
+document.getElementById('T7').addEventListener('click', function() {
+    agregarTexto('(G)');
+});
+
+document.getElementById('T8').addEventListener('click', function() {
+    agregarTexto('(H)');
+});
+
+document.getElementById('T9').addEventListener('click', function() {
+    agregarTexto('(I)');
+});
+
+document.getElementById('T10').addEventListener('click', function() {
+    agregarTexto('(J)');
+});
+
+document.getElementById('T11').addEventListener('click', function() {
+    agregarTexto('(K)');
+});
+
+document.getElementById('T12').addEventListener('click', function() {
+    agregarTexto('(L)');
+});
+
+document.getElementById('T13').addEventListener('click', function() {
+    agregarTexto('(M)');
+});
+
+document.getElementById('T14').addEventListener('click', function() {
+    agregarTexto('(N)');
+});
+
+document.getElementById('T15').addEventListener('click', function() {
+    agregarTexto('(O)');
+});
+
+document.getElementById('T16').addEventListener('click', function() {
+    agregarTexto('(P)');
+});
+
+document.getElementById('T17').addEventListener('click', function() {
+    agregarTexto('(Q)');
+});
+
+document.getElementById('T18').addEventListener('click', function() {
+    agregarTexto('(R)');
+});
+
+document.getElementById('T19').addEventListener('click', function() {
+    agregarTexto('(S)');
+});
+
+document.getElementById('T20').addEventListener('click', function() {
+    agregarTexto('(T)');
+});
+
+document.getElementById('T21').addEventListener('click', function() {
+    agregarTexto('(U)');
+});
+
+document.getElementById('T22').addEventListener('click', function() {
+    agregarTexto('(V)');
+});
+
+document.getElementById('T23').addEventListener('click', function() {
+    agregarTexto('(W)');
+});
+
+document.getElementById('T24').addEventListener('click', function() {
+    agregarTexto('(X)');
+});
+
+document.getElementById('T25').addEventListener('click', function() {
+    agregarTexto('(Y)');
+});
+
+document.getElementById('T26').addEventListener('click', function() {
+    agregarTexto('(Z)');
+});
+
+// Función para agregar texto al textarea en la posición del cursor
+function agregarTexto(texto) {
+    var outputTextarea = document.getElementById('inputTextarea');
+    // Obtener la posición actual del cursor
+    var posicionCursor = outputTextarea.selectionStart;
+    // Obtener el contenido del textarea
+    var contenido = outputTextarea.value;
+    // Insertar el texto en la posición del cursor
+    var nuevoContenido = contenido.slice(0, posicionCursor) + texto + contenido.slice(posicionCursor);
+    // Actualizar el valor del textarea con el nuevo contenido
+    outputTextarea.value = nuevoContenido;
+    // Colocar el cursor al final del texto insertado
+    outputTextarea.selectionStart = outputTextarea.selectionEnd = posicionCursor + texto.length;
+    // Colocar el foco en el textarea
+    outputTextarea.focus();
+}
+
+    $(document).ready(function() {
+    // Hacer parpadear el botón seleccionado al cargar la página
+    $("#stopButton").addClass("blink");
+    $("#option1").parent().addClass("blink");
+
+    // Otras funciones que desees ejecutar al cargar la página...
+  
+    });
+  
+
+    $('#uploadButton').click(function() { // Cuando se hace clic en el botón de subir archivo
+
+
+        var confirmacion = confirm("ANTES DE SUBIR EL ARCHIVO EXCEL ASEGURATE DE HABER GUARDADO TU PLANTILLA ! SUBIR ARCHIVO ?");
+    
+    // Verificar si el usuario ha aceptado la confirmación
+    if (confirmacion) {
+      
+
+
+        var file = $('#file1')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+      
+        $.ajax({
+            url: '/guardar-archivo',
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+             //   console.log('Archivo guardado correctamente.');
+             $(".eliminarplantilla").css("display", "block");
+                $("#alertDiv").removeClass().addClass("alert alert-info").html('Archivo  subio correctamente !!');
+                $('#recargar').click();
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo:', error);
+            }
+        });
+
+
+
+        $("#alertDiv").removeClass().addClass("alert alert-success").html('Archivo excel subio correctamente');
+    } else {
+        $("#alertDiv").removeClass().addClass("alert alert-success").html('Subir Archivo excel se cancelo la accion');
+    }
+
+
+
+      
+    });
+
+
+
+
+    $('#uploadButton2').click(function() { // Cuando se hace clic en el botón de subir archivo 2
+        document.getElementById("imagen1-tab").click();
+        var file = $('#file2')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+        
+        $.ajax({
+            url: '/imagen1', // Ruta en el servidor para manejar el archivo
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+            //    console.log('Archivo 2 guardado correctamente.');
+            $("#alertDiv").removeClass().addClass("alert alert-info").html('Archivo  subio correctamente !!');
+                $('#imagenA').attr('src', 'imagen/LOAD.gif');
+
+// Esperar 5 segundos y luego cambiar la imagen a 'imagen/1.gif'
+setTimeout(function() {
+    $('#imagenA').attr('src', 'imagen/1.gif?timestamp=' + new Date().getTime());
+}, 5000); // 5000 milisegundos = 5 segundos
+
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo 2:', error);
+            }
+        });
+    });
+
+
+
+    $('#uploadButton3').click(function() { // Cuando se hace clic en el botón de subir archivo 3
+        document.getElementById("imagen2-tab").click();
+        var file = $('#file3')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+       
+        $.ajax({
+            url: '/imagen3', // Ruta en el servidor para manejar el archivo 3
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+         //       console.log('Archivo 3 guardado correctamente.');
+         $("#alertDiv").removeClass().addClass("alert alert-info").html('Archivo  subio correctamente !!');
+                $('#imagenB').attr('src', 'imagen/LOAD.gif');
+
+// Esperar 3 segundos y luego cambiar la imagen a 'imagen/1.gif'
+setTimeout(function() {
+    $('#imagenB').attr('src', 'imagen/2.gif?timestamp=' + new Date().getTime());
+}, 5000); // 3000 milisegundos = 3 segundos
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo 3:', error);
+            }
+        });
+    });
+
+
+    $('#uploadButton4').click(function() { // Cuando se hace clic en el botón de subir archivo 4
+        document.getElementById("imagen3-tab").click();
+      
+        var file = $('#file4')[0].files[0]; // Obtener el archivo del input file
+        var formData = new FormData();
+        formData.append('file', file);
+
+        $.ajax({
+            url: '/imagen4', // Ruta en el servidor para manejar el archivo 4
+            type: 'POST',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+          //      console.log('Archivo 4 guardado correctamente.');
+          $("#alertDiv").removeClass().addClass("alert alert-info").html('Archivo  subio correctamente !!');
+                // Llamar a la función para recargar las pestañas
+                $('#imagenC').attr('src', 'imagen/LOAD.gif');
+
+// Esperar 3 segundos y luego cambiar la imagen a 'imagen/1.gif'
+setTimeout(function() {
+    $('#imagenC').attr('src', 'imagen/3.gif?timestamp=' + new Date().getTime());
+}, 5000); // 3000 milisegundos = 3 segundos
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error al guardar el archivo 4:', error);
+            }
+        });
+    });
+
+
+
+    $(document).ready(function() {
+        $('#restartServerButton').click(function() {
+            $("#alertDiv").removeClass().addClass("alert alert-danger").html('Reiniciando servidor');
+            $.ajax({
+                url: '/restart-server', // Ruta en el servidor para reiniciar el servidor
+                type: 'GET',
+                success: function(response) {
+             //       console.log('El servidor se reinició correctamente.');
+                    $("#alertDiv").removeClass().addClass("alert alert-success").html('Servidor reiniciado correctamente');
+                    // Puedes hacer alguna acción adicional aquí si es necesario
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error al reiniciar el servidor:', error);
+                }
+            });
+        });
+    });
+
+
+
+
+
+</script>
+<script>
+    document.getElementById('updateNumberForm').addEventListener('submit', function(event) {
+       // alert('Se cambio con exito el numero que recibe el mensaje test de conexion y bienvenida exitosa .. a continuacion se reiniciara el server , escanee el nuevo QR Cuando este disponible y poder usar su nuevo dispositivo !!')
+        $("#alertDiv").removeClass().addClass("alert alert-success").html('Se cambio con exito el numero que recibe el mensaje test de conexion y bienvenida exitosa .. a continuacion se reiniciara el server , escanee el nuevo QR Cuando este disponible y poder usar su nuevo dispositivo !!');
+        event.preventDefault();
+        
+        var newNumber = document.getElementById('newNumber').value;
+      
+        // Enviar el nuevo número al servidor
+        fetch('/update-number', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ newNumber: newNumber })
+        })
+        .then(response => {
+            if (response.ok) {
+             //   console.log('Número actualizado correctamente.');
+             $("#alertDiv").removeClass().addClass("alert alert-info").html('Numero actualizado !!');
+                      } else {
+                console.error('Error al actualizar el número.');
+            }
+        })
+        .catch(error => {
+            console.error('Error de red:', error);
+        });
+    });
+</script>
+<script>
+// Recargar el contenido de las pestañas
+// Función para recargar las imágenes en las pestañas
+function recargarPestanas() {
+    // Nuevas rutas de las imágenes
+    var nuevaImagen1 = 'imagen/1.gif';
+    var nuevaImagen2 = 'imagen/2.gif';
+    var nuevaImagen3 = 'imagen/3.gif';
+
+    // Actualizar la imagen en la pestaña 1
+    $('#imagen1').find('img').attr('src', nuevaImagen1);
+
+    // Actualizar la imagen en la pestaña 2
+    $('#imagen2').find('img').attr('src', nuevaImagen2);
+
+    // Actualizar la imagen en la pestaña 3
+    $('#imagen3').find('img').attr('src', nuevaImagen3);
+}
+
+
+
+
+
+$('#recargar').click(function() {
+       // Limpiar la tabla antes de agregar los nuevos datos
+       $('#numeros-list1 tbody').empty();
+    // Realizar una solicitud AJAX para obtener los nuevos datos de la tabla
+    $.ajax({
+        url: '/actualizarTabla', // Ruta en el servidor para obtener los nuevos datos de la tabla
+        type: 'GET',
+        success: function(response) {
+         
+
+            location.reload();
+        },
+        error: function(xhr, status, error) {
+            console.error('Error al cargar los nuevos datos de la tabla:', error);
+        }
+    });
+});
+
+
+function actualizarImagen(valor) {
+        // Actualizar el valor del segundo input con el mismo valor que el primer input
+        document.getElementById("imagena").value = valor;
+
+
+
+    }
+
+
+ 
+</script>
+<script>
+ 
+    document.addEventListener('DOMContentLoaded', function() {
+        $('.lista-archivos').jstree();
+    });
+
+
+
+
+
+    function obtenerNumeroDeLetra(letra) {
+    // Convertir la letra a mayúscula para manejar tanto mayúsculas como minúsculas
+    letra = letra.toUpperCase();
+
+    // Si la entrada tiene uno, dos o tres caracteres
+    if (letra.length >= 1 && letra.length <= 3) {
+        // Calcular el número de la letra según su posición en el alfabeto
+        var numero = 0;
+        for (var i = 0; i < letra.length; i++) {
+            var codigoAscii = letra.charCodeAt(i);
+            // Verificar si el código está dentro del rango de las letras A-Z
+            if (codigoAscii >= 65 && codigoAscii <= 90) {
+                numero = numero * 26 + (codigoAscii - 64);
+            } else {
+                // Si no es una letra válida, devolver null
+                return null;
+            }
+        }
+        return numero;
+    } else {
+        // Si la entrada no tiene uno, dos o tres caracteres, devolver null
+        return null;
+    }
+}
+
+
+
+
+  
+    $('#guardarfila').click(function(){
+      // Obtener el valor del campo
+      var FILA = $('#FILAN').val();
+
+      var numerodeletras = obtenerNumeroDeLetra(FILA);
+
+
+      
+      // Realizar la solicitud AJAX
+      $.ajax({
+        url: '/guardar_valor', // Ruta en el servidor Node.js
+        method: 'POST',
+        data: { FILA: numerodeletras }, // Datos a enviar al servidor
+        success: function(response){
+          // Manejar la respuesta del servidor
+      //    console.log(response);
+          location.reload();
+        },
+        error: function(xhr, status, error){
+          // Manejar errores de la solicitud AJAX
+          console.error(xhr.responseText);
+        }
+      });
+    });
+
+
+
+//console.log('<%- JSON.stringify(treeData) %>');
+    
+   
+ 
+</script>
+
+<script>
+
+//////////////////////////////////////////////////////
+var selectedNodeId = null; // Variable para almacenar el ID del nodo seleccionado
+
+// Inicializar el árbol y mantener la selección
+function initTree(treeData) {
+    $('#tree').jstree({
+        'core': {
+            'data': treeData
+        }
+    }).on('select_node.jstree', function(e, data) {
+        selectedNodeId = data.node.id; // Guardar el ID del nodo seleccionado
+        var fileName = data.node.text;
+        $('#plantillabase').val(fileName);
+        // Realizar una solicitud AJAX para obtener el contenido del archivo seleccionado
+        $.ajax({
+            url: '/getFileContent',
+            method: 'POST',
+            data: { fileName: fileName },
+            success: function(response) {
+                $('#inputTextarea').val(response);
+                           
+            },
+            error: function(error) {
+                console.error('Error al cargar el contenido del archivo:', error);
+            }
+        });
+    });
+}
+
+
+
+
+
+
+var treeData = <%- JSON.stringify(treeData) %>;
+$(document).ready(function() {
+    $('#tree').jstree({
+        'core': {
+            'data': treeData
+        }
+    }).on('select_node.jstree', function(e, data) {
+        // Restablecer el color negro a todos los elementos de la lista
+        $('#tree').find('a').css('color', 'black');
+        
+        var selectedNode = data.node;
+        var fileName = selectedNode.text;
+        // Realizar una solicitud AJAX para obtener el contenido del archivo seleccionado
+        $('#plantillabase').val(fileName);
+        $.ajax({
+            url: '/getFileContent',
+            method: 'POST',
+            data: { fileName: fileName },
+            success: function(response) {
+                $('#inputTextarea').val(response);
+                $('#startButton').prop('disabled', false);
+                $('#estado').text('Detenido esperando acción');
+                $('#eliminarplantilla').css('display', 'inline-block');
+ 
+                // Resaltar en rojo el elemento seleccionado
+                $('#tree').find('a').css('color', 'black');
+            },
+            error: function(error) {
+                console.error('Error al cargar el contenido del archivo:', error);
+            }
+        });
+    });
+});
+
+// Variable para almacenar el nombre del nodo a seleccionar
+var selectedNodeName = "";
+
+$('#guardarPlantillaBtn').click(function() {
+    $('#reemplazarTexto').click();
+    var contenido = $('#outputTextarea').val();
+  
+    // Verificar si el textarea está vacío
+    if (!contenido.trim()) {
+        alert('No se puede guardar la plantilla vacía!');
+        $("#alertDiv").removeClass().addClass("alert alert-danger").html('No se puede guardar la plantilla vacía!');
+        return; // Detener la ejecución del código
+    }
+
+    // Obtener el nombre del archivo seleccionado sin la extensión
+    var selectedFileName = $('#tree').find('.jstree-clicked').text().trim();
+    var nombreArchivo = prompt('Sobrescribir o Ingresa Nuevo Nombre de plantilla (sin extensión):', selectedFileName.replace('.txt', ''));
+
+    if (nombreArchivo) {
+        selectedNodeName = nombreArchivo + ".txt"; // Nombre del nodo a seleccionar
+        $.ajax({
+            url: '/guardarPlantillaBtn',
+            method: 'POST',
+            data: { contenido: contenido, nombreArchivo: nombreArchivo },
+            success: function(response) {
+                $('#inputTextarea').val('');
+                reloadTree(); // Recargar el árbol con los datos actualizados y seleccionar el nodo
+            },
+            error: function(error) {
+                console.error('Error al guardar la plantilla:', error);
+                $("#alertDiv").removeClass().addClass("alert alert-danger").html('error al guardar plantilla');
+            }
+        });
+    }
+});
+// Recargar el árbol con los datos actualizados y mantener la selección
+function reloadTree() {
+    $.get("/obtenerDatosDirectorio", function(data) {
+        var treeData = data;
+        $('#tree').jstree('destroy'); // Destruir el árbol actual
+        $('#tree').empty(); // Vaciar el contenido del div
+        initTree(treeData); // Volver a inicializar el árbol con los datos actualizados
+    
+
+        // Esperar un tiempo antes de seleccionar y hacer clic en el nodo correspondiente
+        setTimeout(function() {
+            var elementToSelect = $('#tree').find('a').filter(function() {
+                return $(this).text().trim() === selectedNodeName;
+            });
+            elementToSelect.css('color', 'black'); // Cambiar el color del texto a rojo
+            elementToSelect.click(); // Simular un clic en el elemento seleccionado
+        }, 500); // Ajusta el tiempo de espera según sea necesario
+    });
+}
+
+$('#eliminarplantilla').click(function() {
+    // Obtener el nombre del archivo seleccionado
+    var selectedFileName = $('#tree').find('.jstree-clicked').text().trim();
+
+    // Confirmación con el usuario antes de eliminar el archivo
+    var confirmacion = confirm("¿Estás seguro de que deseas eliminar la plantilla '" + selectedFileName + "'?");
+
+    if (confirmacion) {
+        // Realizar una solicitud AJAX para eliminar el archivo seleccionado
+        $.ajax({
+            url: '/eliminarArchivo',
+            method: 'POST',
+            data: { fileName: selectedFileName },
+            success: function(response) {
+                // Manejar la respuesta del servidor después de eliminar el archivo
+            //    console.log('Archivo eliminado con éxito:', response);
+            $("#alertDiv").removeClass().addClass("alert alert-info").html('Plantilla eliminada correctamente !!');
+                // Actualizar el árbol después de la eliminación si es necesario
+                $('#inputTextarea').val('');
+              
+                reloadTree();
+            },
+            error: function(error) {
+                console.error('Error al eliminar el archivo:', error);
+                // Manejar el error en caso de que la eliminación falle
+            }
+        });
+    } else {
+     //   console.log('Eliminación cancelada por el usuario');
+    }
+});
+
+$(document).ready(function() {
+    
+    if ($('#inputTextarea').val().trim() === '') {
+        $('#startButton').prop('disabled', true);
+        $('#estado').text('No hay cargada ninguna plantilla');
+    } else {
+        $('#startButton').prop('disabled', false);
+        $('#estado').text('Detenido esperando acción');
+    }
+
+    $('#inputTextarea').on('input', function() {
+        if ($(this).val().trim() === '') {
+            $('#startButton').prop('disabled', true);
+            $('#estado').text('No hay cargada ninguna plantilla');
+        } else {
+            $('#startButton').prop('disabled', false);
+            $('#estado').text('Detenido esperando acción');
+        }
+    });
+});
+
+
+$('#test').click(function() {
+//inventar datos para test
+$('#A').val('00/00/00'); // Fecha
+$('#B').val('8:00'); // Hora
+
+$('#C').val('Juan Pérez'); // Nombre
+$('#D').val('María García'); // Nombre
+$('#E').val('Pedro López'); // Nombre
+$('#F').val('Ana Martínez'); // Nombre
+
+$('#G').val('Ingeniería'); // Especialidad
+$('#H').val('Medicina'); // Especialidad
+$('#I').val('Diseño'); // Especialidad
+$('#J').val('Educación'); // Especialidad
+
+$('#K').val('Laura Fernández'); // Nombre
+$('#L').val('Alejandro Rodríguez'); // Nombre
+$('#M').val('Sofía Gómez'); // Nombre
+$('#N').val('Martín Sánchez'); // Nombre
+$('#O').val('Arquitectura'); // Especialidad
+$('#P').val('Psicología'); // Especialidad
+$('#Q').val('Marketing'); // Especialidad
+$('#R').val('Contabilidad'); // Especialidad
+$('#S').val('Pablo Pérez'); // Nombre
+$('#T').val('Marina López'); // Nombre
+$('#U').val('Economía'); // Especialidad
+$('#V').val('Fernando Martínez'); // Nombre
+$('#W').val('Diseño Gráfico'); // Especialidad
+$('#X').val('Ana Sánchez'); // Nombre
+$('#Y').val('Pedro Gómez'); // Nombre
+$('#Z').val('Ingeniería Civil'); // Especialidad
+
+    var textoOriginal = document.getElementById("inputTextarea").value;
+
+    var textoModificado = textoOriginal
+    .replace(/\$\('\#A'\)\.val\(\)/g, function() { return $('#A').val(); })
+    .replace(/\$\('\#B'\)\.val\(\)/g, function() { return $('#B').val(); })
+    .replace(/\$\('\#C'\)\.val\(\)/g, function() { return $('#C').val(); })
+    .replace(/\$\('\#D'\)\.val\(\)/g, function() { return $('#D').val(); })
+    .replace(/\$\('\#E'\)\.val\(\)/g, function() { return $('#E').val(); })
+    .replace(/\$\('\#F'\)\.val\(\)/g, function() { return $('#F').val(); })
+    .replace(/\$\('\#G'\)\.val\(\)/g, function() { return $('#G').val(); })
+    .replace(/\$\('\#H'\)\.val\(\)/g, function() { return $('#H').val(); })
+    .replace(/\$\('\#I'\)\.val\(\)/g, function() { return $('#I').val(); })
+    .replace(/\$\('\#J'\)\.val\(\)/g, function() { return $('#J').val(); })
+    .replace(/\$\('\#K'\)\.val\(\)/g, function() { return $('#K').val(); })
+    .replace(/\$\('\#L'\)\.val\(\)/g, function() { return $('#L').val(); })
+    .replace(/\$\('\#M'\)\.val\(\)/g, function() { return $('#M').val(); })
+    .replace(/\$\('\#N'\)\.val\(\)/g, function() { return $('#N').val(); })
+    .replace(/\$\('\#O'\)\.val\(\)/g, function() { return $('#O').val(); })
+    .replace(/\$\('\#P'\)\.val\(\)/g, function() { return $('#P').val(); })
+    .replace(/\$\('\#Q'\)\.val\(\)/g, function() { return $('#Q').val(); })
+    .replace(/\$\('\#R'\)\.val\(\)/g, function() { return $('#R').val(); })
+    .replace(/\$\('\#S'\)\.val\(\)/g, function() { return $('#S').val(); })
+    .replace(/\$\('\#T'\)\.val\(\)/g, function() { return $('#T').val(); })
+    .replace(/\$\('\#U'\)\.val\(\)/g, function() { return $('#U').val(); })
+    .replace(/\$\('\#V'\)\.val\(\)/g, function() { return $('#V').val(); })
+    .replace(/\$\('\#W'\)\.val\(\)/g, function() { return $('#W').val(); })
+    .replace(/\$\('\#X'\)\.val\(\)/g, function() { return $('#X').val(); })
+    .replace(/\$\('\#Y'\)\.val\(\)/g, function() { return $('#Y').val(); })
+    .replace(/\$\('\#Z'\)\.val\(\)/g, function() { return $('#Z').val(); });
+
+  
+
+
+    $.ajax({
+        url: '/obtenerNumeroTelefono', // Ruta en el servidor para obtener el número de teléfono
+        method: 'GET',
+        success: function(response) {
+          
+        
+            
+
+// Asignar el contenido al elemento mensaje
+$("#mensaje").val(textoModificado);
+var numeroTelefono = response.phoneNumber.replace(/^549351/, '');
+            $('#numero').val(numeroTelefono);
+
+          $('#enviarmensaje').click();
+          $("#mensaje").val('');
+          $("#alertDiv").removeClass("alert-info").addClass("alert-warning").html('Auto mensaje enviado');
+
+        },
+        error: function(error) {
+            console.error('Error al obtener el número de teléfono:', error);
+        }
+    });
+});
+
+</script>
+
+
+<script>
+    // Función para actualizar la fecha y hora en la página
+    function actualizarFechaHora() {
+        var fechaActual = new Date().toLocaleDateString();
+        var horaActual = new Date().toLocaleTimeString();
+        
+        document.getElementById("fechaActual").innerText = fechaActual;
+        document.getElementById("horaActual").innerText = horaActual;
+    }
+
+    // Llamar a la función actualizarFechaHora() cada segundo
+    setInterval(actualizarFechaHora, 1000);
+    
+    // Llamar a la función actualizarFechaHora() una vez al cargar la página
+    window.onload = actualizarFechaHora;
+</script>
+
+
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/jstree.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.2.1/themes/default/style.min.css" />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
+
+</head>
+<body>
+   
+
+
+</body>
+</html>

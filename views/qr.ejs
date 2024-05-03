@@ -1,0 +1,104 @@
+<!-- views/qr.ejs -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp QR Code</title>
+ 
+</head>
+<body>
+    <div id="estado">en espera....</div>
+    <div id="qrContainer">
+        <h1>Escanea el siguiente código QR con WhatsApp</h1>
+        <img id="qrCodeImage" src="<%= qrCode %>" alt="WhatsApp QR Code">
+    </div>
+    <div id="statusMessage" style="display: none;"></div>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script>
+        
+
+        const socket = io();
+
+        socket.on('connect', () => {
+        socket.emit('requestStatus');
+    });
+
+
+        // Escuchar el evento 'qrCodeUpdated'
+        socket.on('qrCodeUpdated', (newQrCode) => {
+            // Actualizar dinámicamente la imagen del código QR
+            const qrCodeImage = document.getElementById('qrCodeImage');
+            qrCodeImage.src = newQrCode;
+        });
+
+        // Escuchar el evento 'authenticated'
+     // Escuchar el evento 'authenticated'
+  socket.on('authenticated', (status) => {
+    if (status === 1) {
+      $('#estado').html('CONECTADO');
+      $("#qrContainer").hide();
+    } else {
+      // Puedes manejar el otro estado aquí si es necesario
+      $('#estado').html('DESCONECTADO');
+      // Puedes decidir mostrar el contenedor nuevamente si es necesario
+       $("#qrContainer").show();
+    }
+  });
+  // Escuchar el evento 'authenticated'
+  socket.on('desconectadow', () => {
+           
+           $('#estado').html('DESCONECTADO .... esperando QR');
+         });
+        
+
+    </script>
+
+ <!-- Agrega un formulario con AJAX para enviar mensajes -->
+  <form id="enviarMensajeForm">
+    <label for="numero">Número:</label>
+    <input type="text" id="numero" name="numero" required>
+
+    <label for="mensaje">Mensaje:</label>
+    <textarea id="mensaje" name="mensaje" required></textarea>
+
+    <!-- Agrega un botón para enviar el mensaje con AJAX -->
+    <button type="button" onclick="enviarMensaje()">Enviar Mensaje</button>
+  </form>
+
+
+
+  <script>
+    // ... Código existente ...
+
+    // Función para enviar mensajes mediante AJAX
+    function enviarMensaje() {
+        // Obtener los valores del formulario
+        const numero = $('#numero').val();
+        const mensaje = $('#mensaje').val();
+
+        // Realizar la solicitud AJAX
+        $.ajax({
+            url: '/enviar-mensaje', // Ruta del servidor para manejar la solicitud
+            method: 'POST',
+            data: { numero: numero, mensaje: mensaje },
+            success: function (response) {
+                // Manejar la respuesta del servidor si es necesario
+                console.log(response);
+            },
+            error: function (error) {
+                // Manejar errores si es necesario
+                console.error(error);
+            }
+        });
+    }
+</script>
+
+
+
+
+</body>
+</html>

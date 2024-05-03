@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabla de Datos</title>
+    <style>
+        /* Estilo para la tabla */
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        /* Estilo para las celdas de la tabla */
+        td, th {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+
+        /* Estilo para las filas pares de la tabla */
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        /* Estilo para el encabezado de la tabla */
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tabla de Datos</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th> <!-- Nueva columna para el número de fila -->
+                <th>Columna A</th>
+                <th>Columna C</th>
+                <th>Columna D</th>
+                <th>Columna F</th>
+                <th>Columna I</th>
+            </tr>
+        </thead>
+        <tbody>
+            <% rowData.forEach((row, index) => { %>
+                <tr>
+                    <td><%= index %></td> <!-- Muestra el número de fila -->
+                    <% row.forEach(cell => { %>
+                        <td><%= cell %></td>
+                    <% }); %>
+                </tr>
+            <% }); %>
+        </tbody>
+    </table>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PUSHISAP</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #000;
+            color: #28a745;
+            text-align: center;
+            padding: 20px;
+        }
+        .custom-file-input {
+            color: transparent;
+        }
+        .custom-file-input::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+        .custom-file-input::before {
+            content: 'Seleccionar Archivo';
+            display: inline-block;
+            background: #007bff;
+            color: #fff;
+            border: 1px solid #007bff;
+            border-radius: 5px;
+            padding: 8px 20px;
+            outline: none;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        .custom-file-input:hover::before {
+            background: #0056b3;
+        }
+        .custom-file-input:active::before {
+            background: #003366;
+        }
+    </style>
+</head>
+<body>
+    <img src="http://localhost:3000/IMAGEN/sinxcel.gif" width="200" height="200" alt="Logo">
+
+    <h3>Hola, para comenzar proporciona un archivo XLSX</h3>
+    <div class="container mt-4">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="input-group mb-3">
+                    <div class="custom-file">
+                        <input type="file" class="custom-file-input" id="file1" name="file1" accept=".xlsx" required>
+                        <label class="custom-file-label" for="file1">Seleccionar Archivo</label>
+                    </div>
+                    <div class="input-group-append">
+                        <button id="uploadButton" class="btn btn-success">Subir XLSX</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
+    <script>
+        $(document).ready(function() {
+            $('#file1').change(function() { // Cuando se selecciona un archivo en el input file
+                       var file = $('#file1')[0].files[0]; // Obtener el archivo seleccionado en el input file
+                    var formData = new FormData();
+                    formData.append('file', file);
+
+                    $.ajax({
+                        url: '/guardar-archivo',
+                        type: 'POST',
+                        data: formData,
+                        contentType: false,
+                        processData: false,
+                        success: function(response) {
+                            console.log('Archivo guardado correctamente.');
+                            location.reload(); // Recargar la página después de guardar el archivo
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error al guardar el archivo:', error);
+                        }
+                    });
+
+               
+            });
+        });
+    </script>
+</body>
+</html>

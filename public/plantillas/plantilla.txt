@@ -1,0 +1,7 @@
+cccccccccccccc$('#A').val()
+DDDDD $('#B').val()
+
+1😍
+21 CONFIRMAR TURNO ✅
+2 CANCELAR TURNO ❌
+3 REPROGRAMAR TURNO 🔄

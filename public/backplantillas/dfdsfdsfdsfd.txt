@@ -1,0 +1,3 @@
+HOLA $('#C').val()  
+LE RECORDAMOS QUE  EL DIA $('#A').val() 
+EL HORARIO DE $('#C').val()
