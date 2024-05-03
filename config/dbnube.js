@@ -13,7 +13,7 @@ const connectconlanube = () => {
   const db = mongoose.connection;
 
   db.on('error', (error) => {
-    console.error('PUSHI : NO ME HE PODIDO CONECTAR CON MONGO EN LA NUBE .... AGUARDEMOS LA CONEXION CON WHATSAP !! UN MOMENTO PORFAOR..');
+    console.error('PUSHI 9: NO ME HE PODIDO CONECTAR CON MONGO EN LA NUBE .... AGUARDEMOS LA CONEXION CON WHATSAP !! UN MOMENTO PORFAOR..');
     // Puedes personalizar el mensaje de error que se muestra
   });
 
