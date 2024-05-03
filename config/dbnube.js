@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 
 const connectconlanube = () => {
   // Cadena de conexión a tu base de datos en MongoDB Atlas
-  const uri = 'mongodb+srv://arielobolo:1BmpX9jD7vJHYEC3@cluster0.8wakkry.mongodb.net/dbapi?retryWrites=true&w=majority';
+  const uri = '';
   
   mongoose.connect(uri, {
     useNewUrlParser: true,
